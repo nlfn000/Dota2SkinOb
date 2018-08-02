@@ -1,3 +1,4 @@
+import json
 import time
 
 from bs4 import BeautifulSoup
@@ -6,6 +7,10 @@ from utils.basic_bs4 import *
 from utils.multiprocess import *
 
 ENTRY_TIME = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
+item_list = []
+with open('../data/item_list.dat', 'r') as f:
+    for line in f.readlines():
+        item_list.append(json.loads(line))
 
 
 def do_nothing(*params):
@@ -55,6 +60,7 @@ def get_favorite(cookie):
     htmls = [get_page(url, header)]
     soup = BeautifulSoup(htmls[0], 'lxml')
     yw1 = soup.find(id='yw1')
+    htmls = []
     if yw1:
         hrefs = find_all_by_class(yw1, 'page')
         for href in hrefs:
@@ -201,7 +207,27 @@ def get_item(hash_name):
     return None
 
 
+def get_hash_name(local_name):
+    for item in item_list:
+        if item['LocalName'] == local_name:
+            return item['MarketHashName']
+
+
 if __name__ == '__main__':
     # main()
-    p = get_item('Inscribed Golden Moonfall')
+    # p = get_item('Inscribed Golden Moonfall')
+    cookie = 'Hm_lvt_86084b1bece3626cd94deede7ecf31a8=1532388578,1532410844,1532436867,1532825265; C5Machines=K04L09ABNcV8agQWMSdR4w%3D%3D; hibext_instdsigdipv2=1; _ga=GA1.2.1941859886.1524123140; _gid=GA1.2.1659917844.1531665722; MEIQIA_EXTRA_TRACK_ID=15XwX7XOg1dbRgQ4x5SZeyP01wq; C5Appid=570; C5NoticeBounces1532429420=close; C5NoticeBounces1532524898=close; C5NoticeBounces1532585125=close; C5Sate=a275c19765ab4abaa9b99d0e6a158dc31f668a61a%3A4%3A%7Bi%3A0%3Bs%3A9%3A%22554215820%22%3Bi%3A1%3Bs%3A15%3A%22steam_163428551%22%3Bi%3A2%3Bi%3A259200%3Bi%3A3%3Ba%3A0%3A%7B%7D%7D; C5Lang=zh; C5SessionID=kn89vm29k376s39su98q9svac7; Hm_lpvt_86084b1bece3626cd94deede7ecf31a8=1533006257; C5Token=5b5d0eb9d3ea2; C5Login=554215820; C5_NPWD=K04L09ABNcV8agQWMSdR4w%3D%3D; trdipcktrffcext=1'
+    p = get_favorite(cookie)
     print(p)
+    fav = []
+    for item in p:
+        info = get_item(get_hash_name(item))
+        info['Price'] = float(info['Price'].split(' ')[-1])
+        fav.append(info)
+    fav.sort(key=lambda x: x['Price'])
+    for item in fav:
+        print(item)
+    for i in range(len(fav)):
+        sub = fav[0:i+1]
+        total = sum([x['Price'] for x in sub])
+        print(total)

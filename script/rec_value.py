@@ -1,5 +1,8 @@
 import json
 import os
+import sys
+
+sys.path.append('C:/Users/P51/Dota2SkinOb')
 import time
 from script.steammarket_api import get_value as get_steam_value
 from utils.multiprocess import *
@@ -76,4 +79,4 @@ def rec_data(src_site, hash_name, dat_file, local_name=None):
 
 
 if __name__ == '__main__':
-    for_all_items(rec_data, src_site='dotasell', basic_timeout=0.1)
+    for_all_items(rec_data, src_site=sys.argv[1], basic_timeout=0.1)
