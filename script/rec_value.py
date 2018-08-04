@@ -1,22 +1,22 @@
 import json
 import os
 import sys
+import threading
+import time
 
 sys.path.append('C:/Users/P51/Dota2SkinOb')
-import time
-from script.steammarket_api import get_value as get_steam_value
-from utils.multiprocess import *
-from script.dotasell_api import get_item_info as get_dotasell_value
-from script.c5game_api import get_item as get_c5_price
+
+from prototypes.Observer import Observer
+from prototypes.Probe import DSProbe, C5Probe
+
+ENTRY_TIME = time.strftime("%Y%m%d", time.localtime())
+name_list = []
 
 mutex = threading.Lock()
-wait_timeout = 0
-ENTRY_TIME = time.strftime("%Y%m%d", time.localtime())
 
 
-def for_all_items(do_func, src_site, basic_timeout=1.0):
-    global mutex, wait_timeout
-    name_list = []
+def check_path(src_site):
+    global name_list
     path = '../data/' + src_site + '_data/' + ENTRY_TIME + '.dat'
     if not os.path.exists(path):
         with open(path, 'w'):
@@ -31,52 +31,64 @@ def for_all_items(do_func, src_site, basic_timeout=1.0):
             if price:
                 name_list.append(name)
                 f.write(line)
-    print(f'{len(lines)} recs in total,{len(lines)-len(name_list)} invalid.')
+    print(f'{len(lines)} records exists,{len(lines)-len(name_list)} invalid.')
+    return len(lines)
+
+
+def all_items():
+    global name_list
+    ret = []
     with open('../data/item_list.dat', 'r') as f:
         for line in f.readlines():
             item = json.loads(line)
             hash_name = item['MarketHashName']
-            local_name = item['LocalName']
-            print(hash_name)
             if hash_name not in name_list:
-                start_new_thread(do_func, (src_site, hash_name, ENTRY_TIME, local_name))
-                time.sleep(basic_timeout)
-                time.sleep(wait_timeout)
+                ret.append(hash_name)
+    return ret
 
 
-def rec_data(src_site, hash_name, dat_file, local_name=None):
-    src_site = src_site.lower()
-    if src_site == 'dotasell':
-        state = get_dotasell_value(local_name)
-    elif src_site == 'steammarket':
-        state = get_steam_value(name=hash_name, l='english')
-    elif src_site == 'c5game':
-        state = get_c5_price(hash_name)
+def rec_data(src_site):
+    total = len(all_items()) - check_path(src_site)
+    print(f'{total} items to fetch.')
+    if src_site.lower() == 'dotasell':
+        ProbeType = DSProbe
+        timeout = 0.05
+        disable_proxy = False
+    elif src_site.lower() == 'c5game':
+        ProbeType = C5Probe
+        timeout = 0.1
+        disable_proxy = False
     else:
-        state = None
-    print(state)
-
-    global mutex, wait_timeout
-
-    if not state:
-        if mutex.acquire():
-            wait_timeout += 4
-            mutex.release()
         return
-    else:
-        if mutex.acquire():
-            wait_timeout -= 3.5
-            if wait_timeout <= 0:
-                wait_timeout = 0
-            mutex.release()
 
-    if mutex.acquire():
-        with open('../data/' + src_site + '_data/' + dat_file + '.dat', 'a+') as f:
-            state['MarketHashName'] = hash_name
-            form = json.dumps(state)
-            f.write(form + '\n')
-        mutex.release()
+    ob = Observer(ProbeType, disable_proxy=disable_proxy, max_retry=5)
+    count = 0
+    rec = 0
+    for item in all_items():
+        ob.request(item, shuffle_proxies=False)
+        time.sleep(timeout)
+        if count % 10 == 0:
+            for data in ob.reap():
+                rec += 1
+                print(f'\033[0;32m:[{rec}/{total}]:{data}\033[0;31m')
+                if mutex.acquire():
+                    with open('../data/' + src_site + '_data/' + ENTRY_TIME + '.dat', 'a+') as f:
+                        form = json.dumps(data)
+                        f.write(form + '\n')
+                    mutex.release()
+    ob.task_queue.join()
+    ob.sleep()
+    time.sleep(10)
+    for data in ob.reap():
+        rec += 1
+        print(f'\033[0;32m:[{rec}/{total}]:{data}\033[0;31m')
+        if mutex.acquire():
+            with open('../data/' + src_site + '_data/' + ENTRY_TIME + '.dat', 'a+') as f:
+                form = json.dumps(data)
+                f.write(form + '\n')
+            mutex.release()
 
 
 if __name__ == '__main__':
-    for_all_items(rec_data, src_site=sys.argv[1], basic_timeout=0.1)
+    # rec_data(src_site=sys.argv[1])
+    rec_data(src_site='c5game')

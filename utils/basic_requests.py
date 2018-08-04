@@ -20,17 +20,6 @@ def get_page(url, header=None, proxies=None):
         print(response)
 
 
-def gen_url(base, attrs):
-    st = False
-    for key in attrs.keys():
-        if st:
-            st = True
-        else:
-            base += '&'
-        base += key + '=' + str(attrs[key])
-    return base
-
-
 def generate_url(req_data, base):
     params = urlencode(req_data)
     return base + '?' + params
