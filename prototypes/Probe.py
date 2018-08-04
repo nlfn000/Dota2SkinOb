@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from prototypes.ErrorTraceback import ErrorTraceback
 from utils.basic_bs4 import find_all_by_class, find_by_class
 
-# try to push
+
 class Probe(threading.Thread):
     def __init__(self, task_queue, feedback_queue, failed_queue, disable_proxy, fill_lock, backup_proxies, code='NaN',
                  min_proxy_backup=10, max_retry=5, **kwargs):
