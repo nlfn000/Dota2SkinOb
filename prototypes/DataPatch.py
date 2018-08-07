@@ -16,7 +16,12 @@ class DataPatch:
         return self._status_code == 200
 
     def data(self):
-        return self._data
+        if self._status_code == 200:
+            return self._data
+        return self.message()
+
+    def not_found(self):
+        return self._status_code == 0
 
     def message(self):
         message = defaultdict(lambda: self.__str__())

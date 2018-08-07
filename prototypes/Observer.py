@@ -39,6 +39,7 @@ class Observer(object):
             self.proxy_pool.freeze()
         if self.__alive.locked():
             self.__alive.release()
+        print('\033[0;36m:observer shut down.\033[0m')
 
     def _service(self):
         self.__alive.acquire()
@@ -67,6 +68,10 @@ class Observer(object):
         ret = []
         while not self.feedback_queue.empty():
             ret.append(self.feedback_queue.get())
+        while not self.failed_queue.empty():
+            task, patch = self.failed_queue.get()
+            if task.get('hash_name') and patch.not_found():
+                ret.append({'hash_name': task['hash_name'], 'NotFound': True})
         return ret
 
 
