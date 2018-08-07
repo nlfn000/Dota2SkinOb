@@ -1,8 +1,2 @@
-import requests
-
-hash_name = 'Astral Drift'
-base = 'https://www.c5game.com/dota.html?min=&max=&k='
-response = requests.get(base + str(hash_name))
-if response.status_code == 200:
-    html = response.text
-    print(html)
+for i in range(10):
+    print(f'\033[0;3{i}m:epoch {i}\033[0;31m')

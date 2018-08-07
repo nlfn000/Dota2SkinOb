@@ -3,6 +3,8 @@
     <words>
       <w>attrs</w>
       <w>bref</w>
+      <w>keyfunc</w>
+      <w>refetch</w>
     </words>
   </dictionary>
 </component>
