@@ -5,7 +5,7 @@ from prototypes.Probe import *
 from prototypes.ProxyPool import ProxyPool
 from utils.proxies import conceal_proxies
 from utils.inst_probes import *
-from secrets.login_settings import *
+from private.login_settings import *
 
 
 class Observer(object):

@@ -58,7 +58,8 @@ def conceal_proxies(pages=5, rate=0.3, **kwargs):
             for d in json_data:
                 f.write(json.dumps(d) + '\n')
     else:
-        print(f'\033[0;36m:{len(json_data)-1} proxies loaded.\033[0m')
+        print(f'\033[0;36m:{len(json_data)-1} proxies loaded.- '
+              f'last update:{time.strftime("%Y.%m.%d-%H:%M",last_update)}\033[0m')
     json_data.pop(0)
     return json_data
 

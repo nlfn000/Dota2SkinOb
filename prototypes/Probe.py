@@ -49,7 +49,7 @@ class Probe(threading.Thread):
                 self.feedback_queue.put(patch.data())
             else:
                 self.failed_queue.put((task, patch))
-                print(f'\033[0;31m:Probe {self.code}:task failed with {patch.message()}.\033[0m')
+                print(f'\033[0;37m:Probe {self.code}:task failed with {patch.message()}.\033[0m')
             self.task_queue.task_done()
 
     def fetch_data(self, **options):
