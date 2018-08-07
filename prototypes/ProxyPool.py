@@ -10,6 +10,11 @@ class ProxyPool(queue.Queue):
         self.__alive = threading.Lock()
         self.activate(**supply_options)
 
+    def restart(self, **supply_options):
+        self.freeze()
+        time.sleep(0.05)
+        self.activate(**supply_options)
+
     def activate(self, **supply_options):
         t = threading.Thread(target=self._service, kwargs=supply_options)
         t.start()

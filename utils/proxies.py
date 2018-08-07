@@ -41,23 +41,26 @@ def request_proxies(pages, rate=0.3):
 
 
 def conceal_proxies(pages=5, rate=0.3, **kwargs):
+    json_data = []
     with open('../data/proxies/proxies.dat', 'r') as f:
-        lines = f.readlines()
-    last_update = time.struct_time(json.loads(lines[0]))
+        for line in f.readlines():
+            json_data.append(json.loads(line))
+    last_update = time.struct_time(json_data[0])
     now = time.localtime()
     delta = time.mktime(now) - time.mktime(last_update)
     if delta > 16 * 60:
-        data = request_proxies(pages, rate)
-        print(f'\033[0;36m:{len(data)} new proxies fetched.\033[0m')
         last_update = now
+        json_data = [last_update]
+        data = request_proxies(pages, rate)
+        json_data.extend(data)
+        print(f'\033[0;36m:{len(data)} new proxies fetched.\033[0m')
+        with open('../data/proxies/proxies.dat', 'w') as f:
+            for d in json_data:
+                f.write(json.dumps(d) + '\n')
     else:
-        lines.pop(0)
-        data = [json.loads(line) for line in lines]
-    with open('../data/proxies/proxies.dat', 'w') as f:
-        f.write(json.dumps(last_update) + '\n')
-        for d in data:
-            f.write(json.dumps(d) + '\n')
-    return data
+        print(f'\033[0;36m:{len(json_data)-1} proxies loaded.\033[0m')
+    json_data.pop(0)
+    return json_data
 
 
 if __name__ == '__main__':

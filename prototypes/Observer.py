@@ -9,22 +9,25 @@ from secrets.login_settings import *
 
 
 class Observer(object):
-    proxy_pool: ProxyPool
     probe_cluster: List[Any]
 
-    def __init__(self, ProbeType=Probe, max_probes=7, **settings):
+    def __init__(self, ProbeType=Probe, max_probes=7, proxy_pool=None, **settings):
 
         self.task_queue = queue.Queue()
         self.feedback_queue = queue.Queue()
         self.failed_queue = queue.Queue()
 
-        self.proxy_pool = None
+        self.proxy_pool = proxy_pool
         self.__alive = threading.Lock()
         self.activate(ProbeType=ProbeType, max_probes=max_probes, **settings)
 
     def activate(self, ProbeType, max_probes, enable_proxy=True, collect_func=conceal_proxies, **settings):
         if enable_proxy:
-            self.proxy_pool = ProxyPool(collect_func=collect_func, **settings)
+            if self.proxy_pool:
+                if self.__alive.locked():
+                    self.proxy_pool.restart(collect_func=collect_func, **settings)
+            else:
+                self.proxy_pool = ProxyPool(collect_func=collect_func, **settings)
         self.probe_cluster = [
             ProbeType(task_queue=self.task_queue,
                       feedback_queue=self.feedback_queue,
@@ -65,14 +68,14 @@ class Observer(object):
         self.task_queue.put(options)
 
     def reap(self):
-        ret = []
-        while not self.feedback_queue.empty():
-            ret.append(self.feedback_queue.get())
-        while not self.failed_queue.empty():
-            task, patch = self.failed_queue.get()
-            if task.get('hash_name') and patch.not_found():
-                ret.append({'hash_name': task['hash_name'], 'NotFound': True})
-        return ret
+            ret = []
+            while not self.feedback_queue.empty():
+                ret.append(self.feedback_queue.get())
+            while not self.failed_queue.empty():
+                task, patch = self.failed_queue.get()
+                if task.get('hash_name') and patch.not_found():
+                    ret.append({'hash_name': task['hash_name'], 'NotFound': True})
+            return ret
 
 
 if __name__ == '__main__':
