@@ -2,65 +2,77 @@ import time
 import threading
 
 from prototypes.DataPatch import DataPatch
+from prototypes.LogEnabled import LogEnabled
+from prototypes.OptionsEnabled import OptionsEnabled
 
 
-class Probe(threading.Thread):
-    def __init__(self, task_queue, feedback_queue, failed_queue, proxy_pool, code='NaN',
-                 max_retry=5, default_timeout=20, retry_interval=3, **settings):
+class Probe(OptionsEnabled, LogEnabled, threading.Thread):
+    def __init__(self, code='NaN', **settings):
+        OptionsEnabled.__init__(self)
+        LogEnabled.__init__(self)
         threading.Thread.__init__(self)
-
-        self.type = 'ProtoType'
+        # container
+        self.task_queue, self.feedback_queue, self.failed_queue, self.proxy_pool = None, None, None, None
+        self.probe_type = 'ProtoType'  # info
         self.code = code
+        self.settings(max_retry=5, default_timeout=20, retry_interval=3)
+        self.proxy = None
 
-        self.task_queue = task_queue
-        self.feedback_queue = feedback_queue
-        self.failed_queue = failed_queue
-
-        self.proxy_pool = proxy_pool
-        self.proxy = proxy_pool.get() if self.proxy_pool else None
-
-        self._max_retry = max_retry
-        self._default_timeout = default_timeout
-        self._retry_interval = retry_interval
+    def connect(self, observer):
+        self.task_queue = observer.task_queue
+        self.feedback_queue = observer.feedback_queue
+        self.log = observer.log
+        self.proxy_pool = observer.proxy_connector
 
     def _shuffle_proxies(self):
         self.proxy = self.proxy_pool.next(self.proxy)
-        print(f'\033[0;36m:Probe {self.code}:shuffled to {self.proxy}\033[0m')
+        self._log(6, f':Probe {self.code}:shuffled to {self.proxy}')
 
     def _retry(self, **task):
         if self.proxy_pool:
             self.proxy = self.proxy_pool.get()
-            print(f'\033[0;31m:Probe {self.code}:proxy abandoned:shuffled to {self.proxy}\033[0m')
-        time.sleep(self._retry_interval)
+            self._log(1, f':Probe {self.code}:proxy abandoned:shuffled to {self.proxy}')
+        time.sleep(self.options['retry_interval'])
         return self.fetch_data(**task)
 
     def run(self):
-        print(f'\033[0;36m:Probe {self.code} activated.:type-{self.type}\033[0m')
+        self._log(6, f':Probe {self.code} activated.:type-{self.probe_type}')
+        if self.proxy_pool:
+            self._shuffle_proxies()
         while True:
             task = self.task_queue.get()
             if task.get('shuffle_proxies') and self.proxy_pool:
                 self._shuffle_proxies()
             patch = self.fetch_data(**task)
-            retry = self._max_retry
+            retry = self.options['max_retry']
             while patch.lost() and retry > 0:
                 retry -= 1
                 patch = self._retry(**task)
             if patch.valid():
                 self.feedback_queue.put(patch.data())
             else:
-                self.failed_queue.put((task, patch))
-                print(f'\033[0;37m:Probe {self.code}:task failed with {patch.message()}.\033[0m')
+                if task.get('hash_name') and patch.not_found():
+                    self.feedback_queue.put({'hash_name': task['hash_name'], 'NotFound': True})
+                self._log(7, f':Probe {self.code}:task failed with {patch.message()}.')
             self.task_queue.task_done()
 
     def fetch_data(self, **options):
         """
         replace this func with custom method.
         """
-        print(f'\033[0;32m:working on{str(options)}\033[0m')
+        self._log(2, f':working on{str(options)}')
         patch = DataPatch(options)
-        print(f'\033[0;32m:data fetched:{patch}\033[0m')
+        self._log(2, f':data fetched:{patch}')
         return patch
 
     def auth(self, **options):
-        print(f'\033[0;32m:authorizing with:{options}\033[0m')
-        pass
+        self._log(2, f':authorizing with:{options}')
+
+
+if __name__ == '__main__':
+    # log = MessageDisplay()
+    p = Probe(fuck=10)
+    # p.log = log
+    # log.activate()
+    print(p.options)
+    # log.freeze()

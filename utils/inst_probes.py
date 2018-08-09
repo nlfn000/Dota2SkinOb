@@ -13,16 +13,15 @@ class DSProbe(Probe):
         self.type = 'DSProbe'
 
     def fetch_data(self, hash_name, timeout=None, target_func='bref', **kwargs):
-        print(f'\033[0;37m:fetch data:{hash_name}\033[0m')
+        self._log(7, f':fetch data:{hash_name}')
         if not timeout:
-            timeout = self._default_timeout
+            timeout = self.options['default_timeout']
         if target_func in 'bref_info':
             return self.bref_info(hash_name, self.proxy, timeout=timeout)
         elif target_func in 'sales_info':
             return self.sales_info(hash_name, self.proxy, timeout=timeout)
 
-    @staticmethod
-    def bref_info(hash_name, proxy, timeout):
+    def bref_info(self, hash_name, proxy, timeout):
         try:
             req_data = {
                 'appid': '570',
@@ -45,13 +44,13 @@ class DSProbe(Probe):
                         return DataPatch({'hash_name': hash_name,
                                           'Price': item['LocalPrice'],
                                           'TotalCount': json['TotalCount']})
-                print('\033[0;36m:DSApi.bref_info:item not found\033[0m')
+                self._log(6, ':DSApi.bref_info:item not found')
                 return DataPatch(status_code=0)
         except Exception as e:
             ErrorTraceback(e)
             return DataPatch(status_code=1)
         else:
-            print(f'\033[0;36m:DSApi.bref_info:{response.status_code}\033[0m')
+            self._log(6, f':DSApi.bref_info:{response.status_code}')
             return DataPatch(status_code=response.status_code)
 
     @staticmethod
@@ -81,17 +80,16 @@ class DSProbe(Probe):
 
 class C5Probe(Probe):
     def __init__(self, **options):
-        Probe.__init__(self, **options)
+        Probe.__init__(self, default_timeout=5, **options)
         self.type = 'C5Probe'
 
     def fetch_data(self, hash_name, timeout=None, **options):
         if not timeout:
-            timeout = self._default_timeout
-        print(f'\033[0;37m:fetch data:{hash_name}\033[0m')
+            timeout = self.options['default_timeout']
+        self._log(7, f':fetch data:{hash_name}')
         return self.bref_info(hash_name, self.proxy, timeout)
 
-    @staticmethod
-    def bref_info(hash_name, proxy, timeout):
+    def bref_info(self, hash_name, proxy, timeout):
         try:
             base = 'https://www.c5game.com/dota.html?min=&max=&k='
             response = requests.get(base + str(hash_name), proxies=proxy, timeout=timeout)
@@ -106,7 +104,7 @@ class C5Probe(Probe):
                         return DataPatch({'hash_name': hash_name,
                                           'OnSale': num,
                                           'Price': price_text})
-                print('\033[0;36m:C5Probe.bref_info:item not found\033[0m')
+                self._log(6, ':C5Probe.bref_info:item not found')
                 return DataPatch(status_code=0)
         except Exception as e:
             ErrorTraceback(e)
@@ -130,8 +128,8 @@ class SteamProbe(Probe):
 
     def fetch_data(self, hash_name=None, target_func='overview', timeout=None, **options):
         if not timeout:
-            timeout = self._default_timeout
-        print(f'\033[0;37m:fetch data:{hash_name}:on func {target_func}\033[0m')
+            timeout = self.options['default_timeout']
+        self._log(7, f':fetch data:{hash_name}:on func {target_func}')
         if 'history' in target_func:
             return self.price_history(hash_name=hash_name, login_auth=self.login_auth, proxy=self.proxy,
                                       timeout=timeout)
@@ -140,8 +138,7 @@ class SteamProbe(Probe):
         elif 'detail' in target_func:
             return self.item_detail(proxy=self.proxy, timeout=timeout, **options)
 
-    @staticmethod
-    def price_history(hash_name, login_auth, timeout=20, appid=570, proxy=None):
+    def price_history(self, hash_name, login_auth, timeout=20, appid=570, proxy=None):
         try:
             url = 'http://steamcommunity.com/market/pricehistory/'
             params = {
@@ -161,11 +158,10 @@ class SteamProbe(Probe):
             ErrorTraceback(e)
             return DataPatch(status_code=1)
         else:
-            print(f'\033[0;31m:bad response:{response.status_code}\033[0m')
+            self._log(1, f':bad response:{response.status_code}')
             return DataPatch(status_code=response.status_code)
 
-    @staticmethod
-    def price_overview(hash_name, timeout=20, appid=570, proxy=None):
+    def price_overview(self, hash_name, timeout=20, appid=570, proxy=None):
         try:
             url = 'https://steamcommunity.com/market/priceoverview/'
             params = {
@@ -185,11 +181,10 @@ class SteamProbe(Probe):
             ErrorTraceback(e)
             return DataPatch(status_code=1)
         else:
-            print(f'\033[0;31m:bad response:{response.status_code}\033[0m')
+            self._log(1, f':bad response:{response.status_code}')
             return DataPatch(status_code=response.status_code)
 
-    @staticmethod
-    def item_detail(start=0, size=100, proxy=None, sort_column='name', timeout=20, **kwargs):
+    def item_detail(self, start=0, size=100, proxy=None, sort_column='name', timeout=20, **kwargs):
         try:
             url = 'https://steamcommunity.com/market/search/render/'
             params = {
@@ -210,7 +205,7 @@ class SteamProbe(Probe):
             ErrorTraceback(e)
             return DataPatch(status_code=1)
         else:
-            print(f'\033[0;31m:bad response:{response.status_code}\033[0m')
+            self._log(1, f':bad response:{response.status_code}')
             change_server()
             return DataPatch(status_code=response.status_code)
 

@@ -1,65 +1,71 @@
 import queue
-from typing import List, Any
 
+from prototypes.MessageDisplay import MessageDisplay
 from prototypes.Probe import *
 from prototypes.ProxyPool import ProxyPool
+from prototypes.Service import Service
 from utils.proxies import conceal_proxies
 from utils.inst_probes import *
 from private.login_settings import *
 
 
-class Observer(object):
-    probe_cluster: List[Any]
+class Observer(LogEnabled, Service):
 
-    def __init__(self, ProbeType=Probe, max_probes=7, proxy_pool=None, **settings):
+    def __init__(self, probe_class=Probe, display_module=None, enable_proxy=True, max_probes=7, proxy_pool=None,
+                 collect_func=conceal_proxies, **settings):
+        LogEnabled.__init__(self, display_module=display_module)
+        Service.__init__(self)
 
+        # basic container
         self.task_queue = queue.Queue()
         self.feedback_queue = queue.Queue()
-        self.failed_queue = queue.Queue()
 
-        self.proxy_pool = proxy_pool
-        self.__alive = threading.Lock()
-        self.activate(ProbeType=ProbeType, max_probes=max_probes, **settings)
+        # basic connector
+        self.probe_connector = []
+        self.proxy_connector = None
 
-    def activate(self, ProbeType, max_probes, enable_proxy=True, collect_func=conceal_proxies, **settings):
+        # initialize
+        if not self.log:
+            self.log = MessageDisplay()
+        if not proxy_pool and enable_proxy:
+            proxy_pool = ProxyPool(collect_func=collect_func)  # create default proxy pool
+        probes = [probe_class(code=i, **settings) for i in range(max_probes)]
+
+        # link components
+        self.link_proxy(proxy_pool)
+        self.link_probe(probes)
+
+        self.activate(enable_proxy=enable_proxy, **settings)
+
+    def activate(self, enable_proxy, color_separation=True, **settings):
+        self.log.activate(color_separation=color_separation)
         if enable_proxy:
-            if self.proxy_pool:
-                if self.__alive.locked():
-                    self.proxy_pool.restart(collect_func=collect_func, **settings)
-            else:
-                self.proxy_pool = ProxyPool(collect_func=collect_func, **settings)
-        self.probe_cluster = [
-            ProbeType(task_queue=self.task_queue,
-                      feedback_queue=self.feedback_queue,
-                      failed_queue=self.failed_queue,
-                      proxy_pool=self.proxy_pool,
-                      code=code, **settings) for code in range(max_probes)]
-        t = threading.Thread(target=self._service)
-        t.start()
+            if self.proxy_connector and self.proxy_connector.is_frozen():  # activate proxies if needed
+                self.proxy_connector.activate(**settings)
+            self.proxy_connector.occupy()
+        super(Observer, self).activate(**settings)
 
-    def freeze(self):
-        if self.proxy_pool:
-            self.proxy_pool.freeze()
-        if self.__alive.locked():
-            self.__alive.release()
-        print('\033[0;36m:observer shut down.\033[0m')
-
-    def _service(self):
-        self.__alive.acquire()
-        for probe in self.probe_cluster:
+    def _service(self, **supply_options):
+        self._freeze.clear()
+        for probe in self.probe_connector:  # activate all probes
             probe.setDaemon(True)
             probe.start()
-        if self.__alive.acquire():
-            print('\033[0;36m:probes turned off.\033[0m')
-            self.__alive.release()
+        self._freeze.wait()  # till frozen
+        self._log(6, ':probes turned off.')
+
+    def freeze(self):
+        self._leave(self.proxy_connector)
+        super(Observer, self).freeze()
+        self._log(6, ':observer shut down.')
+        self.log.freeze()
 
     def auth(self, **options):
-        for probe in self.probe_cluster:
+        for probe in self.probe_connector:
             probe.auth(**options)
 
     def join(self):
         self.task_queue.join()
-        print(f'\033[0;36m:observer:all task joined.\033[0m')
+        self._log(6, ':observer:all task joined.')
         self.freeze()
 
     def request(self, hash_name=None, shuffle_proxies=False, **options):
@@ -68,19 +74,41 @@ class Observer(object):
         self.task_queue.put(options)
 
     def reap(self):
-            ret = []
-            while not self.feedback_queue.empty():
-                ret.append(self.feedback_queue.get())
-            while not self.failed_queue.empty():
-                task, patch = self.failed_queue.get()
-                if task.get('hash_name') and patch.not_found():
-                    ret.append({'hash_name': task['hash_name'], 'NotFound': True})
-            return ret
+        ret = []
+        while not self.feedback_queue.empty():
+            ret.append(self.feedback_queue.get())
+        return ret
+
+    @staticmethod
+    def _leave(component):
+        if component:
+            component.free()
+
+    def link_proxy(self, proxy_pool):
+        if not proxy_pool:
+            return
+        proxy_pool.log = self.log
+        proxy_pool.occupy()
+        if self.proxy_connector:
+            self._leave(self.proxy_connector)
+        self.proxy_connector = proxy_pool
+        for probe in self.probe_connector:
+            probe.connect(self)
+
+    def link_probe(self, probes):
+        for probe in probes:
+            probe.connect(self)
+            self.probe_connector.append(probe)
 
 
 if __name__ == '__main__':
-    ob = Observer(ProbeType=SteamProbe, enable_proxy=False)
+    # ob = Observer(probe_class=Probe, )
+    ob = Observer(probe_class=SteamProbe, enable_proxy=False)
     ob.auth(steamLoginSecure=steamLoginSecure, sessionid=sessionid)
-    ob.request(hash_name='Astral Drift', target_func='history', timeout=1)
+    ob.request(hash_name='Astral Drift', target_func='history', timeout=5)
+    # ob.request(hash_name='Astral Drift')
+    # ob.request(hash_name='A Bit of Boat')
+    # ob.request(hash_name='Not Exist')
+
     ob.join()
     print(ob.reap())

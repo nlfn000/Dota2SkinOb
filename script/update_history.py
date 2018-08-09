@@ -42,7 +42,7 @@ def _transfer_old_data(from_path, to_path):
 
 
 def fetch_history(path, not_recorded, interval=0.6, ticks4reap=5):
-    ob = Observer(ProbeType=SteamProbe, enable_proxy=False)
+    ob = Observer(probe_class=SteamProbe, enable_proxy=False)
     ob.auth(steamLoginSecure=steamLoginSecure, sessionid=sessionid)
 
     for i, item in enumerate(not_recorded):

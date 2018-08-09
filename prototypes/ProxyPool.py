@@ -2,26 +2,30 @@ import queue
 import threading
 import time
 
+from prototypes.LogEnabled import LogEnabled
+from prototypes.OptionsEnabled import OptionsEnabled
+from prototypes.Service import Service
+from utils.proxies import conceal_proxies
 
-class ProxyPool(queue.Queue):
-    def __init__(self, collect_func, **supply_options):
+
+class ProxyPool(OptionsEnabled, Service, LogEnabled, queue.Queue):
+    def __init__(self, collect_func=conceal_proxies):
+        OptionsEnabled.__init__(self)
+        Service.__init__(self)
+        LogEnabled.__init__(self)
         queue.Queue.__init__(self)
-        self.get_proxies = collect_func
-        self.__alive = threading.Lock()
-        self.activate(**supply_options)
+        self.settings(pool_lower_limit=0, pool_retry_interval=5)
+        self.collect_func = collect_func
+        self.__occupied = threading.Semaphore(1)
 
-    def restart(self, **supply_options):
-        self.freeze()
-        time.sleep(0.05)
-        self.activate(**supply_options)
+    def occupy(self):
+        self.__occupied.acquire(blocking=False)
 
-    def activate(self, **supply_options):
-        t = threading.Thread(target=self._service, kwargs=supply_options)
-        t.start()
-
-    def freeze(self):
-        if self.__alive.locked():
-            self.__alive.release()
+    def free(self):
+        self.__occupied.release()
+        if self.__occupied.acquire(blocking=False):
+            self.freeze()
+            self.__occupied.release()
 
     def next(self, used_proxy=None):
         proxy = self.get()
@@ -30,26 +34,23 @@ class ProxyPool(queue.Queue):
         return proxy
 
     def _service(self, **supply_options):
-        self.__alive.acquire()
-        print('\033[0;36m:proxy pool activated.\033[0m')
-        t = threading.Thread(target=self._auto_supply, kwargs=supply_options)
-        t.setDaemon(True)
-        t.start()
-        if self.__alive.acquire():
-            print('\033[0;36m:proxy pool frozen.\033[0m')
-            self.__alive.release()
+        self._log(6, ':proxy pool activated.')
+        super(ProxyPool, self)._service(target=self._auto_supply, kwargs=supply_options)
+        self._log(6, ':proxy pool frozen.')
 
-    def _auto_supply(self, pool_lower_limit=0, pool_retry_interval=5, **supply_options):
+    def _auto_supply(self, **supply_options):
         while True:
-            if self.qsize() <= pool_lower_limit:
-                proxies = self.get_proxies(**supply_options)
+            if self.qsize() <= self.options['pool_lower_limit']:
+                proxies = self.collect_func(**supply_options)
                 if proxies:
                     for p in proxies:
                         self.put(p)
                 else:
-                    print('\033[0;31m:failed to collect proxies.\033[0m')
-                    time.sleep(pool_retry_interval)
+                    self._log(1, ':failed to collect proxies.')
+                    time.sleep(self.options['pool_retry_interval'])
 
 
 if __name__ == '__main__':
-    pass
+    a = ProxyPool()
+    print(a.options)
+    print(a.is_frozen())

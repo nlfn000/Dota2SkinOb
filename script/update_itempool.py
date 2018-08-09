@@ -57,7 +57,7 @@ def fetch_details(path, last_epoch=None, interval=3, size=100, epoch=302, ticks4
         with open('../data/last_epoch.tmp', 'r') as f:
             for line in f.readlines():
                 last_epoch = int(line)
-    ob = Observer(ProbeType=SteamProbe, enable_proxy=False)
+    ob = Observer(probe_class=SteamProbe, enable_proxy=False)
     count = 0
     for i in range(last_epoch, epoch + 1):
         start = i * size
@@ -74,5 +74,5 @@ def fetch_details(path, last_epoch=None, interval=3, size=100, epoch=302, ticks4
 if __name__ == '__main__':
     fp = '../data/item_description.json'
     create_if_not_exist(fp)
-    fetch_details(fp, last_epoch=0, epoch=1)
+    fetch_details(fp, last_epoch=0, epoch=2)
     rm_repeated_records(fp, keyfunc=lambda p: p['hash_name'])

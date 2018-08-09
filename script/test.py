@@ -2,14 +2,41 @@ import threading
 import time
 
 
-def func1():
-    with open('../data/proxies/proxies.dat', 'r') as f:
-        time.sleep(5)
+class A:
+    valueA = 213
 
-t = threading.Thread(target=func1)
-t.start()
-for i in range(15):
-    with open('../data/proxies/proxies.dat', 'r') as f:
-        f.close()
-        print(f.closed)
+    def __init__(self):
+        print('A')
 
+
+class X:
+    valueX = 450
+
+    def __init__(self):
+        print('X')
+
+
+class B(A):
+    def __init__(self):
+        super().__init__()
+        print('B')
+
+
+class C(B):
+    def __init__(self):
+        super().__init__()
+        print('C')
+
+
+class D(B, X):
+    def __init__(self):
+        super().__init__()
+
+
+test = D()
+print(test.valueX)
+test2 = D()
+test2.valueX = 123344
+print(test2.valueX)
+print(test.valueX)
+print('fak')
