@@ -1,8 +1,8 @@
 import sys
 
-from prototypes.MessageDisplay import MessageDisplay
-
 sys.path.append('C:/Users/P51/Projects/Dota2SkinOb')
+
+from prototypes.MessageDisplay import MessageDisplay
 
 import json
 import threading
