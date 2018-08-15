@@ -1,3 +1,5 @@
+import re
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -131,23 +133,26 @@ class SteamProbe(Probe):
             timeout = self.options['default_timeout']
         self._log(7, f':fetch data:{hash_name}:on func {target_func}')
         if 'history' in target_func:
-            return self.price_history(hash_name=hash_name, login_auth=self.login_auth, proxy=self.proxy,
-                                      timeout=timeout)
+            return self.req_pricehistory(hash_name=hash_name, proxies=self.proxy, timeout=timeout)
         elif 'overview' in target_func:
-            return self.price_overview(hash_name=hash_name, proxy=self.proxy, timeout=timeout)
+            return self.req_priceoverview(hash_name=hash_name, proxies=self.proxy, timeout=timeout)
         elif 'detail' in target_func:
-            return self.item_detail(proxy=self.proxy, timeout=timeout, **options)
+            return self.req_search(proxies=self.proxy, timeout=timeout, **options)
+        elif 'order' in target_func:
+            return self.req_itemordershistogram(hash_name=hash_name, proxies=self.proxy, timeout=timeout)
+        elif 'nameid' in target_func:
+            return self.get_item_nameid(hash_name, proxies=self.proxy, timeout=timeout)
 
-    def price_history(self, hash_name, login_auth, timeout=20, appid=570, proxy=None):
+    def req_pricehistory(self, hash_name, **req_options):
         try:
             url = 'http://steamcommunity.com/market/pricehistory/'
             params = {
                 'country': 'JP',
                 'currency': 1,
-                'appid': appid,
+                'appid': 570,
                 'market_hash_name': hash_name,
             }
-            response = requests.get(url, params, cookies=login_auth, timeout=timeout, proxies=proxy)
+            response = requests.get(url, params, cookies=self.login_auth, **req_options)
             if response.status_code == 200:
                 data = response.json()
                 if len(data) == 0:
@@ -161,7 +166,7 @@ class SteamProbe(Probe):
             self._log(1, f':bad response:{response.status_code}')
             return DataPatch(status_code=response.status_code)
 
-    def price_overview(self, hash_name, timeout=20, appid=570, proxy=None):
+    def req_priceoverview(self, hash_name, appid=570, **req_options):
         try:
             url = 'https://steamcommunity.com/market/priceoverview/'
             params = {
@@ -170,7 +175,7 @@ class SteamProbe(Probe):
                 'appid': appid,
                 'market_hash_name': hash_name,
             }
-            response = requests.get(url, params, timeout=timeout, proxies=proxy)
+            response = requests.get(url, params, **req_options)
             if response.status_code == 200:
                 data = response.json()
                 if len(data) == 0:
@@ -184,7 +189,7 @@ class SteamProbe(Probe):
             self._log(1, f':bad response:{response.status_code}')
             return DataPatch(status_code=response.status_code)
 
-    def item_detail(self, start=0, size=100, proxy=None, sort_column='name', timeout=20, **kwargs):
+    def req_search(self, start=0, size=100, sort_column='name', **req_options):
         try:
             url = 'https://steamcommunity.com/market/search/render/'
             params = {
@@ -194,7 +199,7 @@ class SteamProbe(Probe):
                 'start': start,
                 'count': size,
             }
-            response = requests.get(url, params, timeout=timeout, proxies=proxy)
+            response = requests.get(url, params, **req_options)
             if response.status_code == 200:
                 data = response.json()
                 data = data.get('results')
@@ -203,6 +208,59 @@ class SteamProbe(Probe):
                 return DataPatch(status_code=0)
         except Exception as e:
             ErrorTraceback(e)
+            return DataPatch(status_code=1)
+        else:
+            self._log(1, f':bad response:{response.status_code}')
+            change_server()
+            return DataPatch(status_code=response.status_code)
+
+    def req_itemordershistogram(self, hash_name=None, item_nameid=None, **req_options):
+        try:
+            if not item_nameid:
+                if not hash_name:
+                    raise NameError
+                item_nameid = self.get_item_nameid(hash_name, **req_options).data()['item_nameid']
+            url = 'https://steamcommunity.com/market/itemordershistogram'
+            params = {
+                'country': 'CN',
+                'language': 'schinese',
+                'currency': 23,
+                'norender': 1,
+                'item_nameid': item_nameid,
+                'two_factor': 0,
+            }
+            response = requests.get(url, params, **req_options)
+            if response.status_code == 200:
+                data = response.json()
+                if data:
+                    data['hash_name'] = hash_name
+                    data['item_nameid'] = item_nameid
+                    return DataPatch(data)
+                return DataPatch(status_code=0)
+        except Exception as e:
+            ErrorTraceback(e)
+            return DataPatch(status_code=1)
+        else:
+            print(response.url)
+            self._log(1, f':bad response:{response.status_code}')
+            change_server()
+            return DataPatch(status_code=response.status_code)
+
+    def get_item_nameid(self, hash_name, **req_options):
+        try:
+            url = 'https://steamcommunity.com/market/listings/570/' + hash_name
+            response = requests.get(url, **req_options)
+            if response.status_code == 200:
+                html = response.text
+                tar = re.search(r'Market_LoadOrderSpread\( (.*?) \)', html)
+                tar = tar.group(1)
+                return DataPatch({'hash_name': hash_name, 'item_nameid': tar})
+        except Exception as e:
+            if 'AttributeError' in repr(e):
+                print(f'\033[0;31m:{hash_name} item_nameid not found.\033[0m')
+            else:
+
+                ErrorTraceback(e)
             return DataPatch(status_code=1)
         else:
             self._log(1, f':bad response:{response.status_code}')
@@ -219,4 +277,6 @@ class SteamProbe(Probe):
 
 
 if __name__ == '__main__':
-    pass
+    p = SteamProbe()
+    data = p.req_itemordershistogram('Codicil of the Veiled Ones')
+    print(data.data())

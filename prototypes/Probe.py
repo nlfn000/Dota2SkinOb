@@ -15,7 +15,7 @@ class Probe(OptionsEnabled, LogEnabled, threading.Thread):
         self.task_queue, self.feedback_queue, self.failed_queue, self.proxy_pool = None, None, None, None
         self.probe_type = 'ProtoType'  # info
         self.code = code
-        self.settings(max_retry=5, default_timeout=20, retry_interval=3)
+        self.settings(max_retry=4, default_timeout=20, retry_interval=3)
         self.proxy = None
 
     def connect(self, observer):

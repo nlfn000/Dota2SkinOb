@@ -3,7 +3,7 @@ import os
 import time
 
 from prototypes.Observer import Observer
-from utils.inst_probes import *
+from utils.probe_zoo import *
 
 
 def create_if_not_exist(path):

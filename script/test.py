@@ -1,42 +1,41 @@
+import json
 import threading
 import time
 
+from prototypes.Currency import CurrencyEnhancements
+from prototypes.Observer import Observer
+from utils.probe_zoo import SteamProbe
 
-class A:
-    valueA = 213
+data = []
+with open('../data/item_description.json', 'r') as f:
+    for line in f.readlines():
+        d = json.loads(line)
+        if not d.get('item_nameid'):
+            data.append(d)
 
-    def __init__(self):
-        print('A')
+ob = Observer(probe_class=SteamProbe, enable_proxy=False, max_probes=10)
+ob.log.settings(quest_message=True)
 
-
-class X:
-    valueX = 450
-
-    def __init__(self):
-        print('X')
-
-
-class B(A):
-    def __init__(self):
-        super().__init__()
-        print('B')
+for d in data:
+    hash_name = d['hash_name']
+    ob.request(hash_name=hash_name, target_func='nameid')
 
 
-class C(B):
-    def __init__(self):
-        super().__init__()
-        print('C')
+def reap(ob):
+    while not ob.task_queue.empty():
+        for x in ob.reap():
+            for d in data:
+                if d['hash_name'] == x['hash_name']:
+                    d.update(x)
+                    print(d)
+                    break
+        with open('../data/item_description.json', 'w') as f:
+            for d in data:
+                f.write(json.dumps(d) + '\n')
+        time.sleep(4)
 
 
-class D(B, X):
-    def __init__(self):
-        super().__init__()
+t = threading.Thread(target=reap, kwargs={'ob': ob})
+t.start()
 
-
-test = D()
-print(test.valueX)
-test2 = D()
-test2.valueX = 123344
-print(test2.valueX)
-print(test.valueX)
-print('fak')
+ob.join()

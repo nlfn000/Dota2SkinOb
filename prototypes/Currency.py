@@ -21,7 +21,7 @@ class CurrencyEnhancements:
                         '￥': 'CNY',
                         '¥': 'CNY',
                         'CNY': 'CNY'}
-            price_text = price_text.replace(' ', '').replace('\'', '')
+            price_text = price_text.replace(' ', '').replace('\'', '').replace(',', '')
             data_type = self.currency_type
             for prefix in currency:
                 if prefix in price_text:

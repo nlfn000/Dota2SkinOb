@@ -3,4 +3,5 @@ class OptionsEnabled:
         self.options = {}
 
     def settings(self, **kwargs):
+        print(kwargs)
         self.options.update(kwargs)

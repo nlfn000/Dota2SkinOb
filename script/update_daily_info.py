@@ -10,7 +10,7 @@ import time
 
 from prototypes.ProxyPool import ProxyPool
 from script.update_itempool import create_if_not_exist, extract_hash, rm_repeated_records
-from utils.inst_probes import *
+from utils.probe_zoo import *
 from utils.proxies import conceal_proxies
 from prototypes.Observer import Observer
 

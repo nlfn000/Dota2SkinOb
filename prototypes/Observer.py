@@ -5,7 +5,7 @@ from prototypes.Probe import *
 from prototypes.ProxyPool import ProxyPool
 from prototypes.Service import Service
 from utils.proxies import conceal_proxies
-from utils.inst_probes import *
+from utils.probe_zoo import *
 from private.login_settings import *
 
 

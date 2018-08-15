@@ -3,7 +3,11 @@
     <words>
       <w>attrs</w>
       <w>bref</w>
+      <w>itemordershistogram</w>
       <w>keyfunc</w>
+      <w>nameid</w>
+      <w>pricehistory</w>
+      <w>priceoverview</w>
       <w>refetch</w>
     </words>
   </dictionary>
