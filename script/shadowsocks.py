@@ -1,5 +1,4 @@
 import os
-import threading
 import time
 
 
@@ -13,6 +12,8 @@ def change_server():
                 num, r = r.split(',')
                 num = int(num.strip())
                 index = num + 1 if num < 5 else 0
+                if index == 2:
+                    index = 3
                 line = l + ': ' + str(index) + ',' + r
             final_lines.append(line)
     with open(path, 'w', encoding='utf-8') as f:
@@ -22,4 +23,3 @@ def change_server():
     time.sleep(2)
     os.system('start /b C:/Tools/Shadowsocks/Shadowsocks.exe')
     print(':shadowsocks:server changed.')
-
