@@ -67,7 +67,7 @@ def fetch_data(path):
     for d in data:
         hash_name = d['hash_name']
         ob.request(hash_name=hash_name, target_func='nameid')
-        time.sleep(3)
+        time.sleep(1)
 
     ob.join()
     stop_fetch_data.acquire()

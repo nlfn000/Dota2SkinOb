@@ -6,7 +6,6 @@ import requests
 from prototypes.DataPatch import DataPatch
 from prototypes.ErrorTraceback import ErrorTraceback
 from prototypes.Probe import Probe
-from script.shadowsocks import change_server
 
 
 def get_total_item_count():

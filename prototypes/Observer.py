@@ -1,6 +1,5 @@
 import queue
 
-from prototypes.Pool import Pool
 
 from prototypes.SsServer import SsServer
 from utils.MessageDisplay import MessageDisplay
