@@ -1,12 +1,12 @@
 import queue
 
-from prototypes.MessageDisplay import MessageDisplay
+from utils.MessageDisplay import MessageDisplay
 from prototypes.Probe import *
 from prototypes.ProxyPool import ProxyPool
 from prototypes.Service import Service
 from utils.proxies import conceal_proxies
-from utils.probe_zoo import *
 from private.login_settings import *
+from zoo.steam import SteamProbe
 
 
 class Observer(LogEnabled, Service):
@@ -19,10 +19,12 @@ class Observer(LogEnabled, Service):
         # basic container
         self.task_queue = queue.Queue()
         self.feedback_queue = queue.Queue()
+        self.failed_queue = queue.Queue()
 
         # basic connector
         self.probe_connector = []
         self.proxy_connector = None
+        self.ss_lock = threading.Lock()
 
         # initialize
         if not self.log:

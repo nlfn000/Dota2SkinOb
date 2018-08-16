@@ -1,8 +1,12 @@
 import sys
 
+from prototypes.Probe import Probe
+from zoo.c5game import C5Probe
+from zoo.dotasell import DSProbe
+
 sys.path.append('C:/Users/P51/Projects/Dota2SkinOb')
 
-from prototypes.MessageDisplay import MessageDisplay
+from utils.MessageDisplay import MessageDisplay
 
 import json
 import threading
@@ -10,7 +14,6 @@ import time
 
 from prototypes.ProxyPool import ProxyPool
 from script.update_itempool import create_if_not_exist, extract_hash, rm_repeated_records
-from utils.probe_zoo import *
 from utils.proxies import conceal_proxies
 from prototypes.Observer import Observer
 
@@ -63,7 +66,11 @@ def update_info(src_site, display_module, probe_class, enable_proxy, interval, t
             count += 1
     ob.join()
     _reap_daily_data(path, ob, count * ticks4reap, full_length=str(full_length), type=type)
-    rm_repeated_records(path, keyfunc=lambda p: p['hash_name'])
+    while not ob.failed_queue.empty():
+        failed_task = ob.failed_queue.get()
+        with open('../data/failed.tmp', 'a') as f:
+            f.write(json.dumps(failed_task) + '\n')
+    rm_repeated_records(path, keyfunc=lambda p: p['ash_name'])
 
 
 if __name__ == '__main__':

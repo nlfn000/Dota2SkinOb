@@ -17,12 +17,15 @@ class Probe(OptionsEnabled, LogEnabled, threading.Thread):
         self.code = code
         self.settings(max_retry=4, default_timeout=20, retry_interval=3)
         self.proxy = None
+        self.ss_lock = None
 
     def connect(self, observer):
         self.task_queue = observer.task_queue
         self.feedback_queue = observer.feedback_queue
+        self.failed_queue = observer.failed_queue
         self.log = observer.log
         self.proxy_pool = observer.proxy_connector
+        self.ss_lock = observer.ss_lock
 
     def _shuffle_proxies(self):
         self.proxy = self.proxy_pool.next(self.proxy)
@@ -53,6 +56,8 @@ class Probe(OptionsEnabled, LogEnabled, threading.Thread):
             else:
                 if task.get('hash_name') and patch.not_found():
                     self.feedback_queue.put({'hash_name': task['hash_name'], 'NotFound': True})
+                else:
+                    self.failed_queue.put(task)
                 self._log(7, f':Probe {self.code}:task failed with {patch.message()}.')
             self.task_queue.task_done()
 

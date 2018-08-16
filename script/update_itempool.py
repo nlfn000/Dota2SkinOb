@@ -3,7 +3,7 @@ import os
 import time
 
 from prototypes.Observer import Observer
-from utils.probe_zoo import *
+from zoo.steam import SteamProbe
 
 
 def create_if_not_exist(path):
@@ -49,10 +49,14 @@ def _reap_data(path, ob, i='final'):
                 hash_name = item['hash_name']
                 print(f'\033[0;33m:epoch {i} "{count}:{hash_name} recorded. \033[0m')
                 f.write(json.dumps(item) + '\n')
+    while not ob.failed_queue.empty():
+        failed_task = ob.failed_queue.get()
+        with open('../data/failed.tmp', 'a') as f:
+            f.write(json.dumps(failed_task) + '\n')
     return count
 
 
-def fetch_details(path, last_epoch=None, interval=3, size=100, epoch=302, ticks4reap=5):
+def fetch_details(path, last_epoch=None, interval=2, size=100, epoch=302, ticks4reap=10):
     if last_epoch is None:
         with open('../data/last_epoch.tmp', 'r') as f:
             for line in f.readlines():
@@ -71,8 +75,25 @@ def fetch_details(path, last_epoch=None, interval=3, size=100, epoch=302, ticks4
     _reap_data(path, ob)
 
 
+def refetch_failed_task(path, interval=3):
+    ob = Observer(probe_class=SteamProbe, enable_proxy=False)
+    tasks = []
+    with open('../data/failed.tmp', 'r') as f:
+        for line in f.readlines():
+            tasks.append(json.loads(line)['start'])
+    with open('../data/failed.tmp', 'w') as f:
+        pass
+    for start in tasks:
+        ob.request(start=start, target_func='detail')
+        time.sleep(interval)
+    ob.join()
+    _reap_data(path, ob)
+
+
 if __name__ == '__main__':
-    fp = '../data/item_description.json'
+    fp = '../data/item_description_saver.json'
     create_if_not_exist(fp)
-    fetch_details(fp, last_epoch=0, epoch=2)
+    fetch_details(fp)
+    time.sleep(60)
+    refetch_failed_task(fp)
     rm_repeated_records(fp, keyfunc=lambda p: p['hash_name'])

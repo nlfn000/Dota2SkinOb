@@ -1,14 +1,11 @@
 import os
+import threading
 import time
 
 
 def change_server():
     path = 'C:/Tools/Shadowsocks/gui-config.json'
     final_lines = []
-    with open('../data/tmp/shadowsocks.lock', 'r') as f:
-        text = f.readline()
-        if int(text) == 1:
-            return
     with open(path, 'r', encoding='utf-8') as f:
         for line in f.readlines():
             if 'index' in line:
@@ -22,12 +19,7 @@ def change_server():
         for line in final_lines:
             f.write(line)
     os.system('@ taskkill /F /IM shadowsocks.exe')
-    with open('../data/tmp/shadowsocks.lock', 'w') as f:
-        f.write('1')
-    time.sleep(3)
-    with open('../data/tmp/shadowsocks.lock', 'w') as f:
-        f.write('0')
+    time.sleep(2)
     os.system('start /b C:/Tools/Shadowsocks/Shadowsocks.exe')
     print(':shadowsocks:server changed.')
 
-# change_server()
