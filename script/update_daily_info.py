@@ -54,7 +54,7 @@ def update_info(src_site, display_module, probe_class, enable_proxy, interval, t
 
     if not enable_proxy:
         proxy_pool = None
-    ob = Observer(display_module=display_module, probe_class=probe_class, max_probes=45, proxy_pool=proxy_pool,
+    ob = Observer(display_module=display_module, probe_class=probe_class, max_probes=30, proxy_pool=proxy_pool,
                   enable_proxy=enable_proxy)
 
     not_recorded = _not_recorded(path)
