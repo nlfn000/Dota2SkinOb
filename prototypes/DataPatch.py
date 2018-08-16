@@ -20,6 +20,12 @@ class DataPatch:
             return self._data
         return self.message()
 
+    def data_dict_(self):
+        if self._data:
+            return self._data
+        else:
+            return {}
+
     def not_found(self):
         return self._status_code == 0
 

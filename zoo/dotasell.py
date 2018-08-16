@@ -40,8 +40,8 @@ class DSProbe(Probe):
                     hash_n = item['MarketHashName']
                     if hash_n == hash_name:
                         return DataPatch({'hash_name': hash_name,
-                                          'Price': item['LocalPrice'],
-                                          'TotalCount': json['TotalCount']})
+                                          's_price': item['LocalPrice'],
+                                          's_quantity': json['TotalCount']})
                 self._log(6, ':DSApi.bref_info:item not found')
                 return DataPatch(status_code=0)
         except Exception as e:

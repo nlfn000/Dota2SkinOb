@@ -19,6 +19,8 @@ class C5Probe(Probe):
             return self.bref_info(hash_name, self.proxy, timeout=timeout)
         elif target_func in 'sales_info':
             return self.sales_info(hash_name, self.proxy, timeout=timeout)
+        elif target_func in 'entire_info':
+            return self.entire_info(hash_name, self.proxy, timeout=timeout)
 
     def bref_info(self, hash_name, proxy, timeout):
         try:
@@ -33,8 +35,8 @@ class C5Probe(Probe):
                     price_text = li.find(attrs={'class': 'price'}).text
                     if name == hash_name:
                         return DataPatch({'hash_name': hash_name,
-                                          'OnSale': num,
-                                          'Price': price_text})
+                                          's_quantity': num,
+                                          's_price': price_text})
                 self._log(6, ':C5Probe.bref_info:item not found')
                 return DataPatch(status_code=0)
         except Exception as e:
@@ -56,8 +58,8 @@ class C5Probe(Probe):
                     price_text = li.find(attrs={'class': 'price'}).text
                     if name == hash_name:
                         return DataPatch({'hash_name': hash_name,
-                                          'OnSale': num,
-                                          'Price': price_text})
+                                          'p_quantity': num,
+                                          'p_price': price_text})
                 self._log(6, ':C5Probe.bref_info:item not found')
                 return DataPatch(status_code=0)
         except Exception as e:
@@ -65,3 +67,11 @@ class C5Probe(Probe):
             return DataPatch(status_code=1)
         else:
             return DataPatch(status_code=response.status_code)
+
+    def entire_info(self, hash_name, proxy, timeout):
+        s = self.bref_info(hash_name, proxy, timeout)
+        p = self.sales_info(hash_name, proxy, timeout)
+        s = s.data_dict_()
+        p = p.data_dict_()
+        s.update(p)
+        return s

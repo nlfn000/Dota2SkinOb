@@ -7,6 +7,7 @@ from prototypes.ProxyPool import ProxyPool
 from prototypes.Service import Service
 from utils.proxies import conceal_proxies
 from private.login_settings import *
+from zoo.c5game import C5Probe
 from zoo.steam import SteamProbe
 
 
@@ -109,10 +110,10 @@ class Observer(LogEnabled, Service):
 
 
 if __name__ == '__main__':
-    # ob = Observer(probe_class=Probe, )
-    ob = Observer(probe_class=SteamProbe, enable_proxy=False)
-    ob.auth(steamLoginSecure=steamLoginSecure, sessionid=sessionid)
-    ob.request(hash_name='Astral Drift', target_func='history', timeout=5)
+    ob = Observer(probe_class=C5Probe, )
+    # ob = Observer(probe_class=SteamProbe, enable_proxy=False)
+    # ob.auth(steamLoginSecure=steamLoginSecure, sessionid=sessionid)
+    ob.request(hash_name='Astral Drift', target_func='entire', timeout=5)
     # ob.request(hash_name='Astral Drift')
     # ob.request(hash_name='A Bit of Boat')
     # ob.request(hash_name='Not Exist')
