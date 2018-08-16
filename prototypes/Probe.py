@@ -18,7 +18,7 @@ class Probe(OptionsEnabled, LogEnabled, threading.Thread):
                                                                                                            None]
         self.probe_type = 'ProtoType'  # info
         self.code = code
-        self.settings(max_retry=4, default_timeout=20, retry_interval=3, task_interval=3)
+        self.settings(max_retry=4, default_timeout=20, retry_interval=3, task_interval=0)
         self.proxy = None
         self.shadowsocks = None
 
