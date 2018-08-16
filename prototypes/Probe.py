@@ -2,6 +2,7 @@ import time
 import threading
 
 from prototypes.DataPatch import DataPatch
+from prototypes.ErrorTraceback import ErrorTraceback
 from prototypes.LogEnabled import LogEnabled
 from prototypes.OptionsEnabled import OptionsEnabled
 
@@ -12,20 +13,22 @@ class Probe(OptionsEnabled, LogEnabled, threading.Thread):
         LogEnabled.__init__(self)
         threading.Thread.__init__(self)
         # container
-        self.task_queue, self.feedback_queue, self.failed_queue, self.proxy_pool = None, None, None, None
+        self.task_queue, self.processing_queue, self.feedback_queue, self.failed_queue, self.proxy_pool = [None, None,
+                                                                                                           None, None,
+                                                                                                           None]
         self.probe_type = 'ProtoType'  # info
         self.code = code
         self.settings(max_retry=4, default_timeout=20, retry_interval=3)
         self.proxy = None
-        self.ss_lock = None
+        self.shadowsocks = None
 
     def connect(self, observer):
         self.task_queue = observer.task_queue
-        self.feedback_queue = observer.feedback_queue
         self.failed_queue = observer.failed_queue
+        self.feedback_queue = observer.feedback_queue
         self.log = observer.log
         self.proxy_pool = observer.proxy_connector
-        self.ss_lock = observer.ss_lock
+        self.shadowsocks = observer.shadowsocks
 
     def _shuffle_proxies(self):
         self.proxy = self.proxy_pool.next(self.proxy)
@@ -66,7 +69,13 @@ class Probe(OptionsEnabled, LogEnabled, threading.Thread):
         replace this func with custom method.
         """
         self._log(2, f':working on{str(options)}')
-        patch = DataPatch(options)
+
+        try:
+            patch = DataPatch(options)
+        except Exception as e:
+            ErrorTraceback(e)
+            patch = DataPatch(status_code=450)
+
         self._log(2, f':data fetched:{patch}')
         return patch
 
