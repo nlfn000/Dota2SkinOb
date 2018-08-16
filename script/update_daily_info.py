@@ -31,20 +31,23 @@ def _not_recorded(path):
     return to_rec
 
 
-def _reap_daily_data(path, ob, i, full_length='?', type=1):
-    for index, data in enumerate(ob.reap()):
-        i = i + 1
-        if type is 1:
-            print(f'\033[0;34m:epoch [{i}/{full_length}]:{data}\033[0;31m')
-        elif type is 2:
-            print(f'\033[0;33m:epoch [{i}/{full_length}]:{data}\033[0;31m')
-        with open(path, 'a+') as f:
-            form = json.dumps(data)
-            f.write(form + '\n')
+def _reap_daily_data(path, ob, full_length='?', type=1):
+    count = 0
+    while True:
+        for data in ob.reap():
+            count += 1
+            if type is 1:
+                print(f'\033[0;34m:epoch [{count}/{full_length}]:{data}\033[0;31m')
+            elif type is 2:
+                print(f'\033[0;33m:epoch [{count}/{full_length}]:{data}\033[0;31m')
+            with open(path, 'a+') as f:
+                form = json.dumps(data)
+                f.write(form + '\n')
+        time.sleep(15)
 
 
-def update_info(src_site, display_module, probe_class, enable_proxy, interval, timeout=1, type=1, ticks4reap=40,
-                proxy_pool=None):
+def update_info(src_site, display_module, probe_class, enable_proxy, interval, timeout=1, type=1,
+                proxy_pool=None, target_func='info'):
     src_site = src_site.lower()
     path = '../data/' + src_site + '_data/' + ENTRY_TIME + '.dat'
     create_if_not_exist(path)
@@ -56,21 +59,16 @@ def update_info(src_site, display_module, probe_class, enable_proxy, interval, t
 
     not_recorded = _not_recorded(path)
     full_length = len(not_recorded)
-    count = 0
 
     for i, hash_name in enumerate(not_recorded):
-        ob.request(hash_name=hash_name, timeout=timeout)
-        time.sleep(interval)
-        if ob.feedback_queue.qsize() > ticks4reap:
-            _reap_daily_data(path, ob, count * ticks4reap, str(full_length), type)
-            count += 1
+        ob.request(hash_name=hash_name, timeout=timeout, target_func=target_func)
+
+    r = threading.Thread(target=_reap_daily_data, args=[path, ob, str(full_length), type])
+    r.setDaemon(True)
+    r.start()
+
     ob.join()
-    _reap_daily_data(path, ob, count * ticks4reap, full_length=str(full_length), type=type)
-    while not ob.failed_queue.empty():
-        failed_task = ob.failed_queue.get()
-        with open('../data/failed.tmp', 'a') as f:
-            f.write(json.dumps(failed_task) + '\n')
-    rm_repeated_records(path, keyfunc=lambda p: p['ash_name'])
+    rm_repeated_records(path, keyfunc=lambda p: p['hash_name'])
 
 
 if __name__ == '__main__':
@@ -86,8 +84,8 @@ if __name__ == '__main__':
         'timeout': 2,
     }
     to_update = [
-        {'probe_class': DSProbe, 'src_site': 'dotasell'},
-        {'probe_class': C5Probe, 'src_site': 'c5game', 'enable_proxy': True, 'type': 2},
+        # {'probe_class': DSProbe, 'src_site': 'dotasell'},
+        {'probe_class': C5Probe, 'src_site': 'c5game', 'enable_proxy': True, 'type': 2, 'target_func': 'entire'},
     ]
     for site in to_update:
         t = threading.Thread(target=update_info, kwargs=dict(settings, **site))

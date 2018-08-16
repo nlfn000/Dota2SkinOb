@@ -71,7 +71,10 @@ class C5Probe(Probe):
     def entire_info(self, hash_name, proxy, timeout):
         s = self.bref_info(hash_name, proxy, timeout)
         p = self.sales_info(hash_name, proxy, timeout)
+        if s.lost() and p.lost():
+            return DataPatch(status_code=1)
         s = s.data_dict_()
         p = p.data_dict_()
         s.update(p)
-        return s
+        s['hash_name'] = hash_name
+        return DataPatch(s)
