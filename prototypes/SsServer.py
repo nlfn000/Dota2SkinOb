@@ -38,7 +38,7 @@ class SsServer(OptionsEnabled):
             for line in final_lines:
                 f.write(line)
         os.system('@ taskkill /F /IM shadowsocks.exe')
-        time.sleep(2)
+        time.sleep(1)
         os.system('start /b C:/Tools/Shadowsocks/Shadowsocks.exe')
         print(':shadowsocks:server changed.')
 

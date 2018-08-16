@@ -1,6 +1,5 @@
 import queue
 
-
 from prototypes.SsServer import SsServer
 from utils.MessageDisplay import MessageDisplay
 from prototypes.Probe import *
@@ -43,7 +42,7 @@ class Observer(LogEnabled, Service):
 
     def state(self):
         t, u, fail = self.task_queue.qsize(), self.task_queue.unfinished_tasks, self.failed_queue.qsize()
-        self._log(2, f'{u}/{t} tasks processing:{fail} failed.')
+        self._log(2, f'{u-t}/{u} tasks processing:{fail} failed.')
 
     def activate(self, enable_proxy, color_separation=True, **settings):
         self.log.activate(color_separation=color_separation)

@@ -1,11 +1,10 @@
 import json
+import queue
 import threading
 import time
 
 from prototypes.Observer import Observer
 from zoo.steam import SteamProbe
-
-stop_fetch_data = threading.Lock()
 
 
 def rm_repeated_records(path):
@@ -38,8 +37,14 @@ def rm_repeated_records(path):
     print(f'\033[0;33m:{total-len(final_lines)} repeated records of {len(final_lines)} removed.\033[0m')
 
 
+def monitor(ob):
+    while True:
+        ob.state()
+        time.sleep(30)
+
+
 def _reap(ob, data, path):
-    while not stop_fetch_data.locked():
+    while True:
         for x in ob.reap():
             for d in data:
                 if d['hash_name'] == x['hash_name']:
@@ -62,15 +67,20 @@ def fetch_data(path):
     ob = Observer(probe_class=SteamProbe, enable_proxy=False, max_probes=5)
 
     t = threading.Thread(target=_reap, kwargs={'ob': ob, 'data': data, 'path': path})
+    t.setDaemon(True)
     t.start()
+
+    state_monitor = threading.Thread(target=monitor, kwargs={'ob': ob})
+    state_monitor.setDaemon(True)
+    state_monitor.start()
 
     for d in data:
         hash_name = d['hash_name']
         ob.request(hash_name=hash_name, target_func='nameid')
-        time.sleep(1)
+        time.sleep(0.3)
 
     ob.join()
-    stop_fetch_data.acquire()
+    print('All task done./')
 
 
 if __name__ == '__main__':
