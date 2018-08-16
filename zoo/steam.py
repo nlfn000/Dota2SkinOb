@@ -167,5 +167,7 @@ class SteamProbe(Probe):
             return DataPatch(status_code=1)
         else:
             self._log(1, f':bad response:{response.status_code}')
+            if response.status_code == 429:
+                time.sleep(61)
             self.shadowsocks.shuffle_server()
             return DataPatch(status_code=response.status_code)
