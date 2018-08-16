@@ -26,14 +26,6 @@ class SteamProbe(Probe):
         Probe.__init__(self, **options)
         self.login_auth = {'sessionid': session_id, 'steamLoginSecure': steam_login_secure}
 
-    def _shuffle_server(self):
-        # time.sleep(70)
-        if not self.ss_lock.locked():
-            self.ss_lock.acquire()
-            change_server()
-            time.sleep(5)
-            self.ss_lock.release()
-
     def auth(self, steamLoginSecure, sessionid=None, **kwargs):
         self.login_auth['steamLoginSecure'] = steamLoginSecure
         self.login_auth['sessionid'] = sessionid if sessionid else self.login_auth['sessionid']
@@ -121,7 +113,7 @@ class SteamProbe(Probe):
             return DataPatch(status_code=1)
         else:
             self._log(1, f':bad response:{response.status_code}')
-            self._shuffle_server()
+            self.shadowsocks.shuffle_server()
             return DataPatch(status_code=response.status_code)
 
     def req_itemordershistogram(self, hash_name=None, item_nameid=None, **req_options):
@@ -155,7 +147,7 @@ class SteamProbe(Probe):
         else:
             print(response.url)
             self._log(1, f':bad response:{response.status_code}')
-            self._shuffle_server()
+            self.shadowsocks.shuffle_server()
             return DataPatch(status_code=response.status_code)
 
     def get_item_nameid(self, hash_name, **req_options):
@@ -176,5 +168,5 @@ class SteamProbe(Probe):
             return DataPatch(status_code=1)
         else:
             self._log(1, f':bad response:{response.status_code}')
-            self._shuffle_server()
+            self.shadowsocks.shuffle_server()
             return DataPatch(status_code=response.status_code)

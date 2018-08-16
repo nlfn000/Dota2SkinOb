@@ -1,5 +1,8 @@
 import queue
 
+from prototypes.Pool import Pool
+
+from prototypes.SsServer import SsServer
 from utils.MessageDisplay import MessageDisplay
 from prototypes.Probe import *
 from prototypes.ProxyPool import ProxyPool
@@ -18,13 +21,13 @@ class Observer(LogEnabled, Service):
 
         # basic container
         self.task_queue = queue.Queue()
-        self.feedback_queue = queue.Queue()
         self.failed_queue = queue.Queue()
+        self.feedback_queue = queue.Queue()
 
         # basic connector
         self.probe_connector = []
         self.proxy_connector = None
-        self.ss_lock = threading.Lock()
+        self.shadowsocks = SsServer()
 
         # initialize
         if not self.log:
@@ -38,6 +41,10 @@ class Observer(LogEnabled, Service):
         self.link_probe(probes)
 
         self.activate(enable_proxy=enable_proxy, **settings)
+
+    def state(self):
+        t, u, fail = self.task_queue.qsize(), self.task_queue.unfinished_tasks, self.failed_queue.qsize()
+        self._log(2, f'{u}/{t} tasks processing:{fail} failed.')
 
     def activate(self, enable_proxy, color_separation=True, **settings):
         self.log.activate(color_separation=color_separation)
