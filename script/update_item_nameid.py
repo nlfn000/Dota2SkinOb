@@ -11,20 +11,19 @@ stop_fetch_data = threading.Lock()
 def rm_repeated_records(path):
     final_lines = []
     black_list = []
-    removed = 0
+    total = 0
     count = 0
     with open(path, 'r') as f:
         for line in f.readlines():
             data = json.loads(line)
+            total += 1
             key = data['hash_name']
             if data.get('item_nameid'):
                 if key not in black_list:
                     count += 1
                     black_list.append(key)
                     final_lines.append(line)
-                else:
-                    removed += 1
-    print(f'------------{count}')
+    print(f'------------{len(final_lines)}')
     with open(path, 'r') as f:
         for line in f.readlines():
             data = json.loads(line)
@@ -32,13 +31,11 @@ def rm_repeated_records(path):
             if key not in black_list:
                 black_list.append(key)
                 final_lines.append(line)
-            else:
-                removed += 1
 
     with open(path, 'w') as f:
         for line in final_lines:
             f.write(line)
-    print(f'\033[0;33m:{removed} repeated records of {removed+len(final_lines)} removed.\033[0m')
+    print(f'\033[0;33m:{total-len(final_lines)} repeated records of {len(final_lines)} removed.\033[0m')
 
 
 def _reap(ob, data, path):
