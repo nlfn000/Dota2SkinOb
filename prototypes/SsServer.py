@@ -9,9 +9,9 @@ from prototypes.OptionsEnabled import OptionsEnabled
 class SsServer(OptionsEnabled):
     def __init__(self):
         super().__init__()
-        self.server_index = [0, 1, 3, 4, 5]
+        self.server_index = [0, 1, 4, 5]
         self._freeze = threading.Lock()
-        self.settings(freeze_interval=2)
+        self.settings(freeze_interval=4)
 
     def shuffle_server(self):
         if self._freeze.locked():

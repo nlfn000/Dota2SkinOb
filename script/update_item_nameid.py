@@ -88,10 +88,11 @@ def fetch_data(path):
         time.sleep(3)
 
     ob.join()
+    time.sleep(5)
     print('All task done./')
 
 
 if __name__ == '__main__':
     fp = '../data/item_description.json'
     rm_repeated_records(fp)
-    fetch_data(fp)
+    # fetch_data(fp)

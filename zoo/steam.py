@@ -152,6 +152,7 @@ class SteamProbe(Probe):
     def get_item_nameid(self, hash_name, **req_options):
         try:
             url = 'https://steamcommunity.com/market/listings/570/' + hash_name
+            time.sleep(1)
             response = requests.get(url, **req_options)
             if response.status_code == 200:
                 html = response.text
