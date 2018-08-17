@@ -14,4 +14,6 @@ if __name__ == '__main__':
     dis.activate()
     c.activate()
     r.activate()
+    c.freeze()
+    r.freeze()
     dis.freeze()

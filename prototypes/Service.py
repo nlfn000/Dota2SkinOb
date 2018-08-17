@@ -13,6 +13,8 @@ class Service:
         self._off.set()
 
     def activate(self):
+        if not self._is_frozen():  # for security
+            return
         t = threading.Thread(target=self.__service_thread)
         t.start()
 
