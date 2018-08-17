@@ -14,6 +14,11 @@ class ComponentLayer(Service):
     def log(self, m_type, message):
         self.message.put((m_type, message))
 
+    def _service(self):
+        while True:
+            data = self.input.get()  # just a pipe now
+            self.output.put(data)
+
     def activate(self):
         super().activate()
         self.log(1, f':{self.__class__.__name__} activated.')
