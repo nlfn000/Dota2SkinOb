@@ -12,9 +12,9 @@ class MessageDisplay(Service, OptionsEnabled, queue.Queue):
         queue.Queue.__init__(self)
         self.settings(color_separation=True, quest_message=True)
 
-    def activate(self, **supply_options):
-        if self.is_frozen():
-            super().activate(**supply_options)
+    def activate(self):
+        if self._is_frozen():
+            super().activate()
 
     def freeze(self):
         while self.qsize() > 0:

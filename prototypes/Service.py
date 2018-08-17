@@ -3,27 +3,26 @@ import threading
 
 class Service:
     def __init__(self):
-        self._freeze = threading.Event()
-        self._freeze.set()
+        self._off = threading.Event()
+        self._off.set()
 
-    def is_frozen(self):
-        return self._freeze.is_set()
+    def _is_frozen(self):
+        return self._off.is_set()
 
     def freeze(self):
-        self._freeze.set()
+        self._off.set()
 
-    def activate(self, **supply_options):
-        t = threading.Thread(target=self._service, kwargs=supply_options)
+    def activate(self):
+        t = threading.Thread(target=self.__service_thread)
         t.start()
 
-    def _service(self, target=None, **supply_options):
-        self._freeze.clear()
-        t = threading.Thread(target=target, kwargs=supply_options)
+    def __service_thread(self):
+        self._off.clear()
+        t = threading.Thread(target=self._service)
         t.setDaemon(True)
         t.start()
-        self._freeze.wait()
+        self._off.wait()
 
-
-if __name__ == '__main__':
-    s = Service()
-    print(s.is_frozen())
+    def _service(self):
+        # replace it with target service
+        pass
