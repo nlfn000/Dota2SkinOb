@@ -2,7 +2,7 @@ import requests
 
 from prototypes.DataPatch import DataPatch
 from utils.ErrorReceiver import handle_error
-from prototypes.Probe import Probe
+from prototypes.Probe_depred import Probe
 
 
 class DSProbe(Probe):

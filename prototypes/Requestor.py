@@ -7,7 +7,7 @@ from prototypes.Exceptions import UrlNotSetException
 
 class Requestor(ComponentLayer):
     """
-        input: key params for request
+        input: key params for requesting
         output: response if status_code == 200
     """
 

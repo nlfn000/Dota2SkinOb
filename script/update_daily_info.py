@@ -1,6 +1,6 @@
 import sys
 
-from prototypes.Probe import Probe
+from prototypes.Probe_depred import Probe
 from zoo.c5game import C5Probe
 from zoo.dotasell import DSProbe
 

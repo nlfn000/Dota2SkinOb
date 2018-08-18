@@ -1,3 +1,6 @@
+"""customized Exceptions."""
+
+
 class UrlNotSetException(Exception):
     def __init__(self):
         err = '::Url not set for requestor.'

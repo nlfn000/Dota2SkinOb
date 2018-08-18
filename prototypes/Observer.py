@@ -2,7 +2,7 @@ import queue
 
 from prototypes.SsServer import SsServer
 from utils.MessageDisplay import MessageDisplay
-from prototypes.Probe import *
+from prototypes.Probe_depred import *
 from prototypes.ProxyPool import ProxyPool
 from prototypes.Service import Service
 from utils.proxies import conceal_proxies

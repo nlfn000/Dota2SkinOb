@@ -5,6 +5,11 @@ from prototypes.Service import Service
 
 
 class ComponentLayer(Service):
+    """
+        basic Layer prototype.
+        input & output: queue typed flow.
+    """
+
     def __init__(self, input_layer=None, message_collector=None):
         super().__init__()
         self.input = input_layer.output if input_layer else queue.Queue()

@@ -2,6 +2,11 @@ from prototypes.ComponentLayer import ComponentLayer
 
 
 class Resolver(ComponentLayer):
+    """
+        input: response
+        output: resolved data
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

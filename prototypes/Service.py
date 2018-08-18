@@ -4,6 +4,9 @@ from prototypes.Indiv import Individualized
 
 
 class Service(Individualized):
+    """
+        basic Service prototype.
+    """
     def __init__(self):
         super().__init__()
         self._off = threading.Event()

@@ -1,4 +1,8 @@
 class Individualized:
+    """
+        basic individualize prototype.
+    """
+
     def __init__(self):
         self._indiv = {}
 

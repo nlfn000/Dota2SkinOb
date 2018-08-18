@@ -8,6 +8,11 @@ from utils.proxies import conceal_proxies
 
 
 class ProxyPool(ComponentLayer):
+    """
+        input: None
+        output: proxies (maintained at a certain quantity)
+    """
+
     def __init__(self, collect_func=conceal_proxies):
         super().__init__(message_collector=MessageDisplay())  # private logger
         self.set(pool_lower_limit=0,
@@ -16,6 +21,7 @@ class ProxyPool(ComponentLayer):
                  pages=5,
                  rate=0.3, )
         self.proxies = queue.Queue()
+        self.output = self.proxies
 
     def activate(self):
         self.message.activate()
@@ -48,11 +54,3 @@ class ProxyPool(ComponentLayer):
                 except FailedToCollectException as e:
                     handle_error(e)
                     time.sleep(self.indiv('pool_retry_interval'))
-
-
-if __name__ == '__main__':
-    a = ProxyPool()
-    a.activate()
-    print(a.get())
-    time.sleep(1)
-    a.freeze()
