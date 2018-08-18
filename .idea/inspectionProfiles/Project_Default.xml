@@ -6,6 +6,7 @@
         <list>
           <option value="input" />
           <option value="id" />
+          <option value="hash" />
         </list>
       </option>
     </inspection_tool>

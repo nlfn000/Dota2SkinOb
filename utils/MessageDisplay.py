@@ -25,7 +25,7 @@ class MessageDisplay(Service):
     def _service(self):
         while True:
             color, op = self.message.get()
-            print(f'\033[0;3{color}m:{op}\033[0m')
+            print(f'\033[0;3{color}m{op}\033[0m')
 
 
 if __name__ == '__main__':

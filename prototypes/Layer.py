@@ -2,7 +2,7 @@ import queue
 from functools import reduce
 
 from prototypes.Exceptions import UncompressedLayerException
-from utils.EmptyMessageCollector import EmptyCollector
+from utils.EmptyCollector import EmptyCollector
 from prototypes.Service import Service
 
 

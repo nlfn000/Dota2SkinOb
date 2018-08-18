@@ -7,6 +7,12 @@ class UrlNotSetException(Exception):
         Exception.__init__(self, err)
 
 
+class FeedbackNotSetException(Exception):
+    def __init__(self):
+        err = '::Feedback not set for retrial.'
+        Exception.__init__(self, err)
+
+
 class FailedToCollectException(Exception):
     def __init__(self):
         err = '::Failed to collect proxies.'

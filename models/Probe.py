@@ -6,6 +6,11 @@ from prototypes.Resolver import Resolver
 
 
 class Probe(CompressedLayer):
+    """
+        tracker for refine data from single sites.
+        structure:
+            [requestor] >> [resolver]
+    """
 
     def __init__(self, input_layer=None, input=None, output=None, message_collector=None, id=''):
         super().__init__(input_layer, input, output, message_collector, id)
@@ -18,4 +23,3 @@ class Probe(CompressedLayer):
         self.resolver = resolver
         layers = [requestor, resolver]
         self.layers = layers
-

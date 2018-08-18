@@ -1,19 +1,32 @@
 from bs4 import BeautifulSoup
 
 from models.Probe import Probe
-from prototypes.Requestor import Requestor
+from prototypes.Requestor import Requestor, ProxiedRequestor
 from prototypes.Resolver import Resolver
+from prototypes.Retryer import Retryer
 from utils.ErrorReceiver import handle_error
 
 
 class C5gameProbe(Probe):
     """
         info tracker on http://www.c5game.com
+        structure:
+            [retryer] <> [requestor] >> [resolver]
     """
 
     class InnerRequestor(Requestor):
-        def __init__(self, input_layer=None, input=None, output=None, message_collector=None, id='', **kwargs):
-            super().__init__(input_layer, input, output, message_collector, id, **kwargs)
+        def __init__(self, input_layer=None, **kwargs):
+            super().__init__(input_layer=input_layer, **kwargs)
+            self.set(url='https://www.c5game.com/dota.html')
+
+        def request(self, **keys):
+            keys['k'] = keys['hash_name']
+            keys.pop('hash_name')
+            return super().request(**keys)
+
+    class InnerProxiedRequestor(ProxiedRequestor):
+        def __init__(self, proxy_pool, input_layer=None, **kwargs):
+            super().__init__(proxy_pool, input_layer=input_layer, **kwargs)
             self.set(url='https://www.c5game.com/dota.html')
 
         def request(self, **keys):
@@ -53,13 +66,21 @@ class C5gameProbe(Probe):
                 else:
                     self.output.put(ret)
 
-    def __init__(self, input_layer=None, input=None, output=None, message_collector=None, id=''):
+    def __init__(self, input_layer=None, input=None, output=None, message_collector=None, id='', proxy_pool=None):
+
+        """
+            A sample structure for the case.
+        """
         super().__init__(input_layer, input, output, message_collector, id)
 
-        requestor = self.InnerRequestor(input=self.input, message_collector=self.message, id=id)  # build the net
-        resolver = self.InnerResolver(requestor, output=self.output, id=id)
-
+        retryer = Retryer(input=self.input, message_collector=self.message)
+        if proxy_pool:
+            requestor = self.InnerProxiedRequestor(proxy_pool, retryer, feedback=retryer.feedback)  # proxied
+        else:
+            requestor = self.InnerRequestor(retryer, feedback=retryer.feedback)  # build the net
+        resolver = self.InnerResolver(requestor, output=self.output)
+        self.retryer = retryer
         self.requestor = requestor
         self.resolver = resolver
-        layers = [requestor, resolver]
+        layers = [retryer, requestor, resolver]
         self.layers = layers
