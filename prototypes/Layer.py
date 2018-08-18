@@ -29,11 +29,11 @@ class LayerCore(Service):
 
     def activate(self):
         super().activate()
-        self.log(1, f':{self.__class__.__name__}<{self.id}> activated.')
+        self.log(7, f':{self.__class__.__name__}<{self.id}> activated.')
 
     def freeze(self):
         super().freeze()
-        self.log(1, f':{self.__class__.__name__}<{self.id}> frozen.')
+        self.log(7, f':{self.__class__.__name__}<{self.id}> frozen.')
 
 
 class Layer(LayerCore):
@@ -60,7 +60,8 @@ class CompressedLayer(Layer):
     """
 
     def __init__(self, input_layer=None, input=None, output=None, message_collector=None, id=''):
-        super().__init__(input_layer, input, output, message_collector, id)
+        super().__init__(input_layer=input_layer, input=input, output=output, message_collector=message_collector,
+                         id=id)
         self.layers = []
 
     def is_frozen(self):
@@ -69,14 +70,14 @@ class CompressedLayer(Layer):
     def activate(self):
         if len(self.layers) < 1:
             raise UncompressedLayerException
-        self.log(1, f':{self.__class__.__name__}<{self.id}> activated.')
+        self.log(6, f':{self.__class__.__name__}<{self.id}> activated.')
         for layer in self.layers:
             layer.activate()
 
     def freeze(self):
         for layer in self.layers:
             layer.freeze()
-        self.log(1, f':{self.__class__.__name__}<{self.id}> frozen.')
+        self.log(6, f':{self.__class__.__name__}<{self.id}> frozen.')
 
     def set(self, **kwargs):
         for layer in self.layers:

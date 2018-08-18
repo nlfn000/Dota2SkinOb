@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 
 from prototypes.Layer import CompressedLayer
-from prototypes.Requestor import Requestor
+from prototypes.Requestor import Requestor, ProxiedRequestor
 from prototypes.Resolver import Resolver
 
 
@@ -12,10 +12,13 @@ class Probe(CompressedLayer):
             [requestor] >> [resolver]
     """
 
-    def __init__(self, input_layer=None, input=None, output=None, message_collector=None, id=''):
+    def __init__(self, input_layer=None, input=None, output=None, proxy_pool=None, message_collector=None, id=''):
         super().__init__(input_layer, input, output, message_collector, id)
 
-        requestor = Requestor(input=self.input, message_collector=self.message, id=id)  # build the net
+        if proxy_pool:
+            requestor = ProxiedRequestor(input=self.input, message_collector=self.message, id=id, proxy_pool=proxy_pool)
+        else:
+            requestor = Requestor(input=self.input, message_collector=self.message, id=id)  # build the net
         requestor.set(url='http://www.baidu.com')
         resolver = Resolver(requestor, output=self.output, id=id)
 

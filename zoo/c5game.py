@@ -1,13 +1,14 @@
 from bs4 import BeautifulSoup
 
 from models.Probe import Probe
+from prototypes.Layer import CompressedLayer
 from prototypes.Requestor import Requestor, ProxiedRequestor
 from prototypes.Resolver import Resolver
 from prototypes.Retryer import Retryer
 from utils.ErrorReceiver import handle_error
 
 
-class C5gameProbe(Probe):
+class C5gameProbe(CompressedLayer):
     """
         info tracker on http://www.c5game.com
         structure:
@@ -15,8 +16,9 @@ class C5gameProbe(Probe):
     """
 
     class InnerRequestor(Requestor):
-        def __init__(self, input_layer=None, **kwargs):
-            super().__init__(input_layer=input_layer, **kwargs)
+        def __init__(self, input_layer=None, input=None, output=None, feedback=None, message_collector=None, id='',
+                     **kwargs):
+            super().__init__(input_layer, input, output, feedback, message_collector, id, **kwargs)
             self.set(url='https://www.c5game.com/dota.html')
 
         def request(self, **keys):
@@ -25,8 +27,9 @@ class C5gameProbe(Probe):
             return super().request(**keys)
 
     class InnerProxiedRequestor(ProxiedRequestor):
-        def __init__(self, proxy_pool, input_layer=None, **kwargs):
-            super().__init__(proxy_pool, input_layer=input_layer, **kwargs)
+        def __init__(self, proxy_pool, input_layer=None, input=None, output=None, feedback=None, message_collector=None,
+                     id='', **kwargs):
+            super().__init__(proxy_pool, input_layer, input, output, feedback, message_collector, id, **kwargs)
             self.set(url='https://www.c5game.com/dota.html')
 
         def request(self, **keys):
