@@ -1,56 +1,58 @@
 import queue
-import threading
 import time
-
-from prototypes.LogEnabled import LogEnabled
-from prototypes.Indiv import OptionsEnabled
-from prototypes.Service import Service
+from prototypes.ComponentLayer import ComponentLayer
+from prototypes.Exceptions import FailedToCollectException
+from utils.ErrorReceiver import handle_error
+from utils.MessageDisplay import MessageDisplay
 from utils.proxies import conceal_proxies
 
 
-class ProxyPool(OptionsEnabled, Service, LogEnabled, queue.Queue):
+class ProxyPool(ComponentLayer):
     def __init__(self, collect_func=conceal_proxies):
-        OptionsEnabled.__init__(self)
-        Service.__init__(self)
-        LogEnabled.__init__(self)
-        queue.Queue.__init__(self)
-        self.settings(pool_lower_limit=0, pool_retry_interval=5)
-        self.collect_func = collect_func
-        self.__occupied = threading.Semaphore(1)
+        super().__init__(message_collector=MessageDisplay())  # private logger
+        self.set(pool_lower_limit=0,
+                 pool_retry_interval=5,
+                 collect_func=collect_func,
+                 pages=5,
+                 rate=0.3, )
+        self.proxies = queue.Queue()
 
-    def occupy(self):
-        self.__occupied.acquire(blocking=False)
+    def activate(self):
+        self.message.activate()
+        super().activate()
 
-    def free(self):
-        self.__occupied.release()
-        if self.__occupied.acquire(blocking=False):
-            self.freeze()
-            self.__occupied.release()
+    def freeze(self):
+        super().freeze()
+        self.message.freeze()
 
-    def next(self, used_proxy=None):
-        proxy = self.get()
-        if used_proxy:
-            self.put(used_proxy)
-        return proxy
+    def get(self):
+        return self.proxies.get()
 
-    def _service(self, **supply_options):
-        self._log(6, ':proxy pool activated.')
-        super(ProxyPool, self)._service(target=self._auto_supply, kwargs=supply_options)
-        self._log(6, ':proxy pool frozen.')
+    def put(self, proxy):
+        self.proxies.put(proxy)
 
-    def _auto_supply(self, **supply_options):
+    def shuffle(self, proxy):
+        self.put(proxy)
+        return self.get()
+
+    def _service(self):
         while True:
-            if self.qsize() <= self.options['pool_lower_limit']:
-                proxies = self.collect_func(**supply_options)
-                if proxies:
-                    for p in proxies:
-                        self.put(p)
-                else:
-                    self._log(1, ':failed to collect proxies.')
-                    time.sleep(self.options['pool_retry_interval'])
+            if self.proxies.qsize() <= self.indiv('pool_lower_limit'):
+                pages = self.indiv('pages')
+                rate = self.indiv('rate')
+                try:
+                    proxies = self.indiv('collect_func')(pages=pages, rate=rate)
+                    if proxies:
+                        for p in proxies:
+                            self.put(p)
+                except FailedToCollectException as e:
+                    handle_error(e)
+                    time.sleep(self.indiv('pool_retry_interval'))
 
 
 if __name__ == '__main__':
     a = ProxyPool()
-    print(a.options)
-    print(a.is_frozen())
+    a.activate()
+    print(a.get())
+    time.sleep(1)
+    a.freeze()

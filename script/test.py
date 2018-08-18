@@ -8,17 +8,15 @@ if __name__ == '__main__':
     dis = MessageDisplay()
 
     c = ComponentLayer(message_collector=dis)
-    r = Requestor(input_layer=c)
+    r = Requestor(input_layer=c, url='http://www.baidu.com')
+
     dis.activate()
     c.activate()
     r.activate()
 
     tasks = c.input
 
-    tasks.put(1)
-    tasks.put(2)
-    time.sleep(2)
-    tasks.put(3)
+    tasks.put({})
     time.sleep(0.5)
 
     c.freeze()

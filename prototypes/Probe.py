@@ -2,7 +2,7 @@ import time
 import threading
 
 from prototypes.DataPatch import DataPatch
-from prototypes.ErrorTraceback import ErrorTraceback
+from utils.ErrorReceiver import handle_error
 from prototypes.LogEnabled import LogEnabled
 from prototypes.Indiv import OptionsEnabled
 
@@ -74,7 +74,7 @@ class Probe(OptionsEnabled, LogEnabled, threading.Thread):
         try:
             patch = DataPatch(options)
         except Exception as e:
-            ErrorTraceback(e)
+            handle_error(e)
             patch = DataPatch(status_code=450)
 
         self._log(2, f':data fetched:{patch}')

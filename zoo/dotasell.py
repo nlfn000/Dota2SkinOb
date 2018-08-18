@@ -1,7 +1,7 @@
 import requests
 
 from prototypes.DataPatch import DataPatch
-from prototypes.ErrorTraceback import ErrorTraceback
+from utils.ErrorReceiver import handle_error
 from prototypes.Probe import Probe
 
 
@@ -45,7 +45,7 @@ class DSProbe(Probe):
                 self._log(6, ':DSApi.bref_info:item not found')
                 return DataPatch(status_code=0)
         except Exception as e:
-            ErrorTraceback(e)
+            handle_error(e)
             return DataPatch(status_code=1)
         else:
             self._log(6, f':DSApi.bref_info:{response.status_code}')
@@ -70,7 +70,7 @@ class DSProbe(Probe):
                     return DataPatch(status_code=0)
                 return DataPatch({'hash_name': hash_name, 'sales': [x['PriceCNYString'] for x in sale_info]})
         except Exception as e:
-            ErrorTraceback(e)
+            handle_error(e)
             return DataPatch(status_code=1)
         else:
             return DataPatch(status_code=response.status_code)

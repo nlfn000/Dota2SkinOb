@@ -1,6 +1,6 @@
 from forex_python.converter import CurrencyRates
 
-from prototypes.ErrorTraceback import ErrorTraceback
+from utils.ErrorReceiver import handle_error
 
 
 class CurrencyEnhancements:
@@ -30,7 +30,7 @@ class CurrencyEnhancements:
             price = float(price_text) / self.currency_cache[data_type]
             return price
         except Exception as e:
-            ErrorTraceback(e)
+            handle_error(e)
 
 
 if __name__ == '__main__':

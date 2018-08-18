@@ -40,7 +40,7 @@ def request_proxies(pages, rate=0.3):
     return proxies
 
 
-def conceal_proxies(pages=5, rate=0.3, **kwargs):
+def conceal_proxies(pages=5, rate=0.3):
     json_data = []
     with open('../data/proxies/proxies.dat', 'r') as f:
         for line in f.readlines():

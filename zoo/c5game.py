@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from prototypes.DataPatch import DataPatch
-from prototypes.ErrorTraceback import ErrorTraceback
+from utils.ErrorReceiver import handle_error
 from prototypes.Probe import Probe
 
 
@@ -40,7 +40,7 @@ class C5Probe(Probe):
                 self._log(6, ':C5Probe.bref_info:item not found')
                 return DataPatch(status_code=0)
         except Exception as e:
-            ErrorTraceback(e)
+            handle_error(e)
             return DataPatch(status_code=1)
         else:
             return DataPatch(status_code=response.status_code)
@@ -63,7 +63,7 @@ class C5Probe(Probe):
                 self._log(6, ':C5Probe.bref_info:item not found')
                 return DataPatch(status_code=0)
         except Exception as e:
-            ErrorTraceback(e)
+            handle_error(e)
             return DataPatch(status_code=1)
         else:
             return DataPatch(status_code=response.status_code)
