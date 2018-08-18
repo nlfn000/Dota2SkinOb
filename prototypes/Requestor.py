@@ -1,38 +1,28 @@
-import queue
-import time
+import requests
 
 from prototypes.ComponentLayer import ComponentLayer
-from utils.MessageDisplay import MessageDisplay
 
 
 class Requestor(ComponentLayer):
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, input_layer=None, message_collector=None, **kwargs):
+        super().__init__(input_layer, message_collector)
+        self.set(params={}, timeout=15)
+        self.set(**kwargs)
 
     def _service(self):
         while True:
-            data = self.input.get()
-            print(data)
-            self.output.put(data)
+            keys = self.input.get()
+            response = self.request(**keys)
+            if response.status_code == 200:
+                self.output.put(response)
+
+    def request(self, **keys):
+        url = self.indiv('url')
+        params = dict(self.indiv('params'))
+        params.update(keys)
+        timeout = self.indiv('timeout')
+        return requests.get(url=url, params=params, timeout=timeout)
 
 
 if __name__ == '__main__':
-    dis = MessageDisplay()
-
-    c = ComponentLayer(message_collector=dis)
-    r = Requestor(c)
-    dis.activate()
-    c.activate()
-    r.activate()
-
-    tasks = c.input
-
-    tasks.put(1)
-    tasks.put(2)
-    time.sleep(2)
-    tasks.put(3)
-    time.sleep(0.5)
-
-    c.freeze()
-    r.freeze()
-    dis.freeze()
+    pass

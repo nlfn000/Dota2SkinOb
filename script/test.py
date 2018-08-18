@@ -1,5 +1,26 @@
-import requests
+import time
 
-url = 'https://partner.steam-api.com/ISteamEconomy/GetMarketPrices/v1/?appid=570&key=0141C0F3E59100DBAECD9858C4950C49'
-response = requests.get(url)
-print(response)
+from prototypes.ComponentLayer import ComponentLayer
+from prototypes.Requestor import Requestor
+from utils.MessageDisplay import MessageDisplay
+
+if __name__ == '__main__':
+    dis = MessageDisplay()
+
+    c = ComponentLayer(message_collector=dis)
+    r = Requestor(input_layer=c)
+    dis.activate()
+    c.activate()
+    r.activate()
+
+    tasks = c.input
+
+    tasks.put(1)
+    tasks.put(2)
+    time.sleep(2)
+    tasks.put(3)
+    time.sleep(0.5)
+
+    c.freeze()
+    r.freeze()
+    dis.freeze()

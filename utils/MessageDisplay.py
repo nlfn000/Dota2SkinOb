@@ -19,6 +19,9 @@ class MessageDisplay(Service):
         super().freeze()
         print(':MessageDisplay off.')
 
+    def raise_msg(self, message):
+        self.message.put(1, message)
+
     def _service(self):
         while True:
             color, op = self.message.get()

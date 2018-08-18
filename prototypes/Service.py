@@ -1,20 +1,23 @@
 import threading
 
+from prototypes.Indiv import Individualized
 
-class Service:
+
+class Service(Individualized):
     def __init__(self):
+        super().__init__()
         self._off = threading.Event()
         self._off.set()
+
+    # def warm_set(self):
 
     def _is_frozen(self):
         return self._off.is_set()
 
     def freeze(self):
-        self._off.set()
+        self._off.set()  # forced shutdown
 
     def activate(self):
-        if not self._is_frozen():  # for security
-            return
         t = threading.Thread(target=self.__service_thread)
         t.start()
 

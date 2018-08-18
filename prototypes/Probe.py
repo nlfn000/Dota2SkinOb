@@ -4,7 +4,7 @@ import threading
 from prototypes.DataPatch import DataPatch
 from prototypes.ErrorTraceback import ErrorTraceback
 from prototypes.LogEnabled import LogEnabled
-from prototypes.OptionsEnabled import OptionsEnabled
+from prototypes.Indiv import OptionsEnabled
 
 
 class Probe(OptionsEnabled, LogEnabled, threading.Thread):

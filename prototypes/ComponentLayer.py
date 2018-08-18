@@ -33,3 +33,5 @@ if __name__ == '__main__':
     c = ComponentLayer(message_collector=dis)
     dis.activate()
     c.activate()
+    c.freeze()
+    dis.freeze()

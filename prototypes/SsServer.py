@@ -3,7 +3,7 @@ import threading
 
 import time
 
-from prototypes.OptionsEnabled import OptionsEnabled
+from prototypes.Indiv import OptionsEnabled
 
 
 class SsServer(OptionsEnabled):

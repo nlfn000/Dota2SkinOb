@@ -3,7 +3,7 @@ import threading
 import time
 
 from prototypes.LogEnabled import LogEnabled
-from prototypes.OptionsEnabled import OptionsEnabled
+from prototypes.Indiv import OptionsEnabled
 from prototypes.Service import Service
 from utils.proxies import conceal_proxies
 
