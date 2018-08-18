@@ -7,6 +7,7 @@ class Service(Individualized):
     """
         basic Service prototype.
     """
+
     def __init__(self):
         super().__init__()
         self._off = threading.Event()
@@ -14,7 +15,7 @@ class Service(Individualized):
 
     # def warm_set(self):
 
-    def _is_frozen(self):
+    def is_frozen(self):
         return self._off.is_set()
 
     def freeze(self):

@@ -1,13 +1,13 @@
 import queue
 import time
-from prototypes.ComponentLayer import ComponentLayer
+from prototypes.Layer import Layer
 from prototypes.Exceptions import FailedToCollectException
 from utils.ErrorReceiver import handle_error
 from utils.MessageDisplay import MessageDisplay
 from utils.proxies import conceal_proxies
 
 
-class ProxyPool(ComponentLayer):
+class ProxyPool(Layer):
     """
         input: None
         output: proxies (maintained at a certain quantity)

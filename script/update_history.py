@@ -1,7 +1,7 @@
 import json
 import time
 
-from prototypes.Observer import Observer
+from trashbin.Observer import Observer
 from script.update_itempool import extract_hash, create_if_not_exist, rm_repeated_records
 from private.login_settings import *
 from zoo.steam import SteamProbe

@@ -1,15 +1,12 @@
 import queue
 
-from prototypes.SsServer import SsServer
+from trashbin.SsServer import SsServer
 from utils.MessageDisplay import MessageDisplay
-from prototypes.Probe_depred import *
+from trashbin.Probe_depred import *
 from prototypes.ProxyPool import ProxyPool
 from prototypes.Service import Service
 from utils.proxies import conceal_proxies
-from private.login_settings import *
 from zoo.c5game import C5Probe
-from zoo.dotasell import DSProbe
-from zoo.steam import SteamProbe
 
 
 class Observer(LogEnabled, Service):

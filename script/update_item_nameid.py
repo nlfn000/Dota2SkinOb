@@ -1,9 +1,8 @@
 import json
-import queue
 import threading
 import time
 
-from prototypes.Observer import Observer
+from trashbin.Observer import Observer
 from zoo.steam import SteamProbe
 
 

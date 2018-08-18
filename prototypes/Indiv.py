@@ -1,6 +1,7 @@
 class Individualized:
     """
         basic individualize prototype.
+        (the last man been fucked. XD
     """
 
     def __init__(self):

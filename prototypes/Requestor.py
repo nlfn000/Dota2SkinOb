@@ -1,18 +1,18 @@
 import requests
 
-from prototypes.ComponentLayer import ComponentLayer
+from prototypes.Layer import Layer
 from utils.ErrorReceiver import handle_error
 from prototypes.Exceptions import UrlNotSetException
 
 
-class Requestor(ComponentLayer):
+class Requestor(Layer):
     """
         input: key params for requesting
-        output: response if status_code == 200
+        output: keys & response (if status_code == 200)
     """
 
-    def __init__(self, input_layer=None, message_collector=None, **kwargs):
-        super().__init__(input_layer, message_collector)
+    def __init__(self, input_layer=None, input=None, output=None, message_collector=None, id='', **kwargs):
+        super().__init__(input_layer, input, output, message_collector, id)
         self.set(params={}, timeout=15)
         self.set(**kwargs)
 
@@ -21,7 +21,7 @@ class Requestor(ComponentLayer):
             keys = self.input.get()
             response = self.request(**keys)
             if response and response.status_code == 200:
-                self.output.put(response)
+                self.output.put((keys, response))
 
     def request(self, **keys):
         url = self.indiv('url')
@@ -35,3 +35,6 @@ class Requestor(ComponentLayer):
             return response
         except Exception as e:
             handle_error(e)
+
+
+class ProxiedRequestor(Requestor):

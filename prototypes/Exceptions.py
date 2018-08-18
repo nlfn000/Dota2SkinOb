@@ -11,3 +11,9 @@ class FailedToCollectException(Exception):
     def __init__(self):
         err = '::Failed to collect proxies.'
         Exception.__init__(self, err)
+
+
+class UncompressedLayerException(Exception):
+    def __init__(self):
+        err = '::Sub layer uncompressed.'
+        Exception.__init__(self, err)

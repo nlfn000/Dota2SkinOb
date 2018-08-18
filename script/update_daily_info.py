@@ -1,8 +1,7 @@
 import sys
 
-from prototypes.Probe_depred import Probe
+from trashbin.Probe_depred import Probe
 from zoo.c5game import C5Probe
-from zoo.dotasell import DSProbe
 
 sys.path.append('C:/Users/P51/Projects/Dota2SkinOb')
 
@@ -15,7 +14,7 @@ import time
 from prototypes.ProxyPool import ProxyPool
 from script.update_itempool import create_if_not_exist, extract_hash, rm_repeated_records
 from utils.proxies import conceal_proxies
-from prototypes.Observer import Observer
+from trashbin.Observer import Observer
 
 ENTRY_TIME = time.strftime("%Y%m%d", time.localtime())
 
