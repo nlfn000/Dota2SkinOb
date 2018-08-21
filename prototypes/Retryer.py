@@ -1,6 +1,6 @@
 import queue
 
-from prototypes.Layer import Layer
+from trashbin.Layer import Layer
 
 
 class Retryer(Layer):

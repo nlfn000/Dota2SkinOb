@@ -10,29 +10,32 @@ class Service(Individualized):
 
     def __init__(self):
         super().__init__()
-        self._off = threading.Event()
+        self._frozen = threading.Event()
         self._processing = threading.Event()
-        self._off.set()
+        self._frozen.set()
 
-    # def warm_set(self):
-
-    def is_frozen(self):
-        return self._off.is_set()
+    def state(self):
+        if self._frozen.is_set():
+            return 'frozen'
+        if self._processing.is_set():
+            return 'processing'
+        return 'waiting'
 
     def freeze(self):
-        self._off.set()  # forced shutdown
+        self._frozen.set()  # forced shutdown
 
     def activate(self):
-        t = threading.Thread(target=self.__service_thread)
-        t.start()
+        if self.state() == 'frozen':
+            t = threading.Thread(target=self.__service_thread)
+            t.start()
 
     def __service_thread(self):
-        self._off.clear()
+        self._frozen.clear()
         t = threading.Thread(target=self._service)
         t.setDaemon(True)
         t.start()
-        self._off.wait()
+        self._frozen.wait()
 
     def _service(self):
-        # replace it with target service
-        pass
+        # do nothing
+        return

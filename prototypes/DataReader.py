@@ -1,7 +1,7 @@
 import json
 
 from prototypes.Exceptions import IllegalJsonException
-from prototypes.Layer import Layer
+from trashbin.Layer import Layer
 from utils.ErrorReceiver import handle_error
 
 

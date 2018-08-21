@@ -1,5 +1,5 @@
-from models.Probe import Probe
-from prototypes.Layer import CompressedLayer
+from trashbin.Probe import Probe
+from trashbin.Layer import CompressedLayer
 
 
 class ProbeCluster(CompressedLayer):

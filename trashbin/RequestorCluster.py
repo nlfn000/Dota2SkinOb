@@ -1,5 +1,5 @@
-from prototypes.Layer import CompressedLayer
-from prototypes.Requestor import Requestor
+from trashbin.Layer import CompressedLayer
+from models.requestor import Requestor
 from utils.EmptyCollector import EmptyCollector
 
 

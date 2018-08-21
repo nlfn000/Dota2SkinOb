@@ -1,7 +1,5 @@
-from bs4 import BeautifulSoup
-
-from prototypes.Layer import CompressedLayer
-from prototypes.Requestor import Requestor, ProxiedRequestor
+from trashbin.Layer import CompressedLayer
+from models.requestor import Requestor, ProxiedRequestor
 from prototypes.Resolver import Resolver
 
 

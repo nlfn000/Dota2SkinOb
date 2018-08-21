@@ -1,9 +1,9 @@
 import queue
 import time
-from prototypes.Layer import Layer
+from trashbin.Layer import Layer
 from prototypes.Exceptions import FailedToCollectException
 from utils.ErrorReceiver import handle_error
-from utils.MessageDisplay import MessageDisplay
+from utils.LogDisplay import LogDisplay
 from utils.proxies import conceal_proxies
 
 
@@ -14,7 +14,7 @@ class ProxyPool(Layer):
     """
 
     def __init__(self, collect_func=conceal_proxies):
-        super().__init__(message_collector=MessageDisplay())  # private logger
+        super().__init__(message_collector=LogDisplay())  # private logger
         self.set(pool_lower_limit=0,
                  pool_retry_interval=5,
                  collect_func=collect_func,

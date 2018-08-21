@@ -1,7 +1,7 @@
 import time
 from random import random
 
-from prototypes.Layer import Layer
+from trashbin.Layer import Layer
 
 
 class Reducer(Layer):

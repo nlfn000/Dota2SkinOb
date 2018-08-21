@@ -5,7 +5,7 @@ from zoo.c5game import C5Probe
 
 sys.path.append('C:/Users/P51/Projects/Dota2SkinOb')
 
-from utils.MessageDisplay import MessageDisplay
+from utils.LogDisplay import LogDisplay
 
 import json
 import threading
@@ -71,7 +71,7 @@ def update_info(src_site, display_module, probe_class, enable_proxy, interval, t
 
 
 if __name__ == '__main__':
-    display = MessageDisplay()
+    display = LogDisplay()
     pool = ProxyPool(collect_func=conceal_proxies)
     settings = {
         'display_module': display,

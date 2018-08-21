@@ -1,14 +1,10 @@
-import time
-
-from models.ProbeCluster import ProbeCluster
-from prototypes.Layer import Layer
+from trashbin.ProbeCluster import ProbeCluster
 from prototypes.ProxyPool import ProxyPool
-from prototypes.Requestor import Requestor
-from utils.MessageDisplay import MessageDisplay
+from utils.LogDisplay import LogDisplay
 from zoo.c5game import C5gameProbe
 
 if __name__ == '__main__':
-    dis = MessageDisplay()
+    dis = LogDisplay()
 
     proxies = ProxyPool()
     p = ProbeCluster(message_collector=dis, probe_type=C5gameProbe, proxy_pool=proxies)

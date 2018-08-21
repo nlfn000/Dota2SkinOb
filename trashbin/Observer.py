@@ -1,7 +1,7 @@
 import queue
 
 from trashbin.SsServer import SsServer
-from utils.MessageDisplay import MessageDisplay
+from utils.LogDisplay import LogDisplay
 from trashbin.Probe_depred import *
 from prototypes.ProxyPool import ProxyPool
 from prototypes.Service import Service
@@ -28,7 +28,7 @@ class Observer(LogEnabled, Service):
 
         # initialize
         if not self.log:
-            self.log = MessageDisplay()
+            self.log = LogDisplay()
         if not proxy_pool and enable_proxy:
             proxy_pool = ProxyPool(collect_func=collect_func)  # create default proxy pool
         probes = [probe_class(code=i, **settings) for i in range(max_probes)]
