@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 
-from models.Probe import Probe
 from prototypes.Layer import CompressedLayer
 from prototypes.Requestor import Requestor, ProxiedRequestor
 from prototypes.Resolver import Resolver
@@ -87,3 +86,7 @@ class C5gameProbe(CompressedLayer):
         self.resolver = resolver
         layers = [retryer, requestor, resolver]
         self.layers = layers
+
+
+t = C5gameProbe.InnerRequestor()
+print(f':{t.__class__.__name__}')

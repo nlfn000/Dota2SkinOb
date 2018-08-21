@@ -7,6 +7,12 @@ class UrlNotSetException(Exception):
         Exception.__init__(self, err)
 
 
+class IllegalJsonException(Exception):
+    def __init__(self):
+        err = '::failed to load json line.'
+        Exception.__init__(self, err)
+
+
 class FeedbackNotSetException(Exception):
     def __init__(self):
         err = '::Feedback not set for retrial.'

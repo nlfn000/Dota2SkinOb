@@ -11,6 +11,7 @@ class Service(Individualized):
     def __init__(self):
         super().__init__()
         self._off = threading.Event()
+        self._processing = threading.Event()
         self._off.set()
 
     # def warm_set(self):
