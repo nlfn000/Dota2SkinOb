@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from trashbin.Layer import CompressedLayer
 from models.requestor import Requestor, ProxiedRequestor
 from prototypes.Resolver import Resolver
-from prototypes.Retryer import Retryer
+from models.retryer import Retryer
 from utils.ErrorReceiver import handle_error
 
 

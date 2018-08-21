@@ -26,19 +26,26 @@ class Universe:
         self._log.freeze()
 
 
-class ToyBrick(Service):
+class Cell(Service):
     def __init__(self, inner=None, *forced_inners):
         super().__init__()  # shell endued
 
-        self.input = inner.output if inner else queue.Queue()
         self.universe = inner.universe if inner else Universe()  # inner auto merged
-        self._inners = [inner] if inner else []
-        self._inners.extend(forced_inners)  # forced merge
-        for x in forced_inners:
-            x.universe = self.universe  # share the universe
 
+        self._input = inner.output if inner else queue.Queue()  # local _input
+        self._inners = [inner] if inner else []
+
+        self.input = inner.input if inner else self._input  # global input
         self.output = queue.Queue()
         self.fail = queue.Queue()
+
+    def forced_inner(self, inner, recur=True):
+        if recur:
+            inner.output = self.input
+        else:
+            inner.output = self._input
+        self._inners.append(inner)  # forced merge
+        inner.universe = self.universe  # share the universe
 
     def log(self, m_type, message):
         self.universe.log(m_type, message)
