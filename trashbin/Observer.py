@@ -3,7 +3,7 @@ import queue
 from trashbin.SsServer import SsServer
 from utils.LogDisplay import LogDisplay
 from trashbin.Probe_depred import *
-from prototypes.ProxyPool import ProxyPool
+from models.proxies import ProxyPool
 from prototypes.Service import Service
 from utils.proxies import conceal_proxies
 from zoo.c5game import C5Probe

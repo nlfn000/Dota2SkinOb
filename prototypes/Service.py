@@ -26,10 +26,10 @@ class Service(Individualized):
 
     def activate(self):
         if self.state() == 'frozen':
-            t = threading.Thread(target=self.__service_thread)
+            t = threading.Thread(target=self._service_thread)
             t.start()
 
-    def __service_thread(self):
+    def _service_thread(self):
         self._frozen.clear()
         t = threading.Thread(target=self._service)
         t.setDaemon(True)

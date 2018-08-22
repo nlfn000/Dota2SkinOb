@@ -27,7 +27,7 @@ class Universe:
 
 
 class Cell(Service):
-    def __init__(self, inner=None, *forced_inners):
+    def __init__(self, inner=None):
         super().__init__()  # shell endued
 
         self.universe = inner.universe if inner else Universe()  # inner auto merged
@@ -39,11 +39,14 @@ class Cell(Service):
         self.output = queue.Queue()
         self.fail = queue.Queue()
 
-    def forced_inner(self, inner, recur=True):
+    def join_input(self, inner, recur=True):
         if recur:
             inner.output = self.input
         else:
             inner.output = self._input
+        self.forced_connection(inner)
+
+    def forced_connection(self, inner):
         self._inners.append(inner)  # forced merge
         inner.universe = self.universe  # share the universe
 
@@ -53,17 +56,19 @@ class Cell(Service):
     def log_exception(self, e):
         self.universe.log_exception(e)
 
-    def activate(self):
+    def activate(self, enable_log=True):
         for x in self._inners:
-            x.activate()
+            x.activate(enable_log)
         super().activate()
-        self.log(7, f':{self.__class__.__name__} activated.')
+        if enable_log:
+            self.log(7, f':{self.__class__.__name__} activated.')
 
-    def freeze(self):
+    def freeze(self, enable_log=True):
         for x in self._inners:
-            x.freeze()
+            x.freeze(enable_log)
         super().freeze()
-        self.log(7, f':{self.__class__.__name__} frozen.')
+        if enable_log:
+            self.log(7, f':{self.__class__.__name__} frozen.')
 
     def state(self):
         ret = super().state()

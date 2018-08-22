@@ -1,6 +1,6 @@
 from trashbin.Layer import CompressedLayer
 from models.requestor import Requestor, ProxiedRequestor
-from prototypes.Resolver import Resolver
+from models.resolver import Resolver
 
 
 class Probe(CompressedLayer):

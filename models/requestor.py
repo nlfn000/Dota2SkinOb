@@ -1,33 +1,31 @@
 import requests
-
-from models.reducer import Reducer
 from prototypes.Cell import Cell
 from prototypes.Exceptions import UrlNotSetException
-from models.retryer import Retryer
 
 
 class Requestor(Cell):
     """
         extra input: key params for requesting
         output < hash & response (if status_code == 200)
-        fail < keys
+        fail < hash & keys
     """
 
     def __init__(self, inner=None, **req_core):
         super().__init__(inner)
-        self.set(params={}, timeout=15)
+        self.set(params={}, timeout=15, hash_key='hash_name')
         self.set(**req_core)
 
     def _service(self):
         while True:
-            keys = self._input.get()
-            response = self.request(**keys)
+            task = self._input.get()
+            response = self._request(**task)
+            _h = task.get(self.indiv('hash_key'))
             if response and response.status_code == 200:
-                self.output.put((keys.get('hash'), response))
+                self.output.put((_h, response))
             else:
-                self.fail.put(keys)
+                self.fail.put((_h, task))
 
-    def request(self, **keys):
+    def _request(self, proxies=None, **keys):
         url = self.indiv('url')
         params = dict(self.indiv('params'))
         params.update(keys)
@@ -35,38 +33,7 @@ class Requestor(Cell):
         try:
             if not url:
                 raise UrlNotSetException
-            response = requests.get(url=url, params=params, timeout=timeout)
+            response = requests.get(url=url, params=params, timeout=timeout, proxies=proxies)
             return response
         except Exception as e:
             self.log_exception(e)
-
-
-class ProxiedRequestor(Requestor):
-    """
-        proxied requestor prototype.
-        must have a ProxyPool.
-    """
-
-
-if __name__ == '__main__':
-    core = {
-        'url': 'http://www.baidu.com'
-    }
-    r = Requestor(**core)
-    r = Reducer(r, interval=1)
-    a = Retryer(r)
-    r.forced_inner(a)
-
-    r.universe.activate()
-    r.activate()
-
-    r.fail.put({'hash': 123})
-    r.input.put({'hash': 123})
-    r.input.put({'hash': 123})
-    r.input.put({'hash': 123})
-    print(r.output.get())
-    print(r.output.get())
-    print(r.output.get())
-    print(r.output.get())
-    r.freeze()
-    r.universe.freeze()
