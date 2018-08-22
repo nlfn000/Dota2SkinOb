@@ -42,8 +42,8 @@ class Cluster(Cell):
 
 
 if __name__ == '__main__':
-    from models.requestor import Requestor
-    from models.resolver import Resolver
+    from models.Requestor import Requestor
+    from models.Resolver import Resolver
     from zoo.c5game import C5game
 
     req_core = {

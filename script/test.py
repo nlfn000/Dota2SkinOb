@@ -1,5 +1,5 @@
 from trashbin.ProbeCluster import ProbeCluster
-from models.proxies import ProxyPool
+from models.ProxyPool import ProxyPool
 from utils.LogDisplay import LogDisplay
 from zoo.c5game import C5gameProbe
 

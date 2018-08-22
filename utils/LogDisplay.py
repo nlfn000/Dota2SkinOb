@@ -22,6 +22,16 @@ class LogDisplay(Service):
     def put(self, package):
         self.message.put(package)
 
+    @staticmethod
+    def log_bar(*args):
+        colors = [2, 4, 7, 1]
+        shapes = ['▂', '▅', '▃', '▁']
+        bar = ''
+        for idx, arg in enumerate(args):
+            arg = int(arg * 30)
+            bar += f'\033[0;3{colors[idx]}m' + arg * shapes[idx] + '\033[0m'
+        print(bar)
+
     def _service(self):
         while True:
             color, op = self.message.get()
@@ -30,3 +40,4 @@ class LogDisplay(Service):
 
 if __name__ == '__main__':
     dis = LogDisplay()
+    dis.log_bar(0.1, 0.3, 0.4, 0.2)

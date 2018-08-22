@@ -1,5 +1,4 @@
 import threading
-
 from prototypes.Indiv import Individualized
 
 
@@ -27,6 +26,7 @@ class Service(Individualized):
     def activate(self):
         if self.state() == 'frozen':
             t = threading.Thread(target=self._service_thread)
+            t.setDaemon(True)
             t.start()
 
     def _service_thread(self):

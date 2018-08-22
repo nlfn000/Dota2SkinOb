@@ -11,7 +11,7 @@ import json
 import threading
 import time
 
-from models.proxies import ProxyPool
+from models.ProxyPool import ProxyPool
 from script.update_itempool import create_if_not_exist, extract_hash, rm_repeated_records
 from utils.proxies import conceal_proxies
 from trashbin.Observer import Observer
